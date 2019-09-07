@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Adobe to Arma Converter - Home</title>
+        <link rel="stylesheet" href="/public/style.css">
+    </head>
+    <body>
+        <audio preload="auto" id="player" src=""></audio>
+        <div class="topnav">
+            <a class="active" href="/">Home</a>
+        </div>
+        <div class="title">
+            <div class="center" id="title">You can only use GROUPS or Rectangles</div>
+            <input id="input" type="file" accept=".svg">
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+          let socket = io(`${document.URL}`)
+          let input = document.getElementById('input');
+          socket.on('converted', data => {
+            console.log(data)
+            window.open(data)
+          })
+          input.type = 'file';
+          input.onchange = e => { 
+              let file = e.target.files[0];
+              let reader = new FileReader()
+              reader.readAsText(file,'UTF-8')
+              reader.onload = readerEvent => {
+                  let content = readerEvent.target.result
+                  socket.emit('svg', content)
+              }
+          }
+          input.click();
+      </script>
+    </body>
+</html>
