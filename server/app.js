@@ -20,6 +20,7 @@ function ParseControls(data, tabs) {
             //console.log(`GROUP: ${element.attributes['data-name']}`)
             let group = [
                 `\n${Align(tabs)}class ${element.attributes['data-name']} {\n`,
+                `${Align(tabs + 1)}COOPR_FULLSCREEN{\n`,
                 `${Align(tabs + 1)}class Controls {\n`,
                 `${ParseControls(element.children, (tabs + 2))}`,
                 `${Align(tabs + 1)}};\n`,
