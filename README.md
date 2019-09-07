@@ -4,3 +4,4 @@ Dependecies:
 - socket.io
 - svgson
 - ip
+- node
