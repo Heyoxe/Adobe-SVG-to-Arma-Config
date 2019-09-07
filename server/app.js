@@ -13,27 +13,69 @@ function isGroup(data) {
     return ((data.name === 'g') ? true : false)
 }
 
-function ParseControls(data, tabs) {
+function getMinMaxOf2DIndex (arr, idx) {
+    return {
+        min: Math.min.apply(null, arr.map(function (e) { return e[idx]})),
+        max: Math.max.apply(null, arr.map(function (e) { return e[idx]}))
+    }
+} 
+
+function getGroupSize(data) {  
+    let Positions = new Array()
+    ParseControls(data.children, 0, false).match(/\(([^\)]+)\)/g).forEach(element => {
+        let numbers = element.replace('(', '').replace(')', '').split(',')
+        numbers.forEach((item, index, array) => {
+            array[index] = Number(item)
+        })
+        numbers = [numbers[0], numbers[1],(numbers[0] + numbers[2]), (numbers[1] + numbers[3])]
+        Positions.push(numbers)
+    })
+    let Position = ([
+        getMinMaxOf2DIndex(Positions, 0).min, 
+        getMinMaxOf2DIndex(Positions, 1).min, 
+        getMinMaxOf2DIndex(Positions, 2).max - getMinMaxOf2DIndex(Positions, 0).min, 
+        getMinMaxOf2DIndex(Positions, 3).max - getMinMaxOf2DIndex(Positions, 1).min
+    ])
+    return Position
+}
+
+function ParseControls(data, tabs, inGroup, GroupPositions) {
     let result = []
     data.forEach(element => {
         if (isGroup(element)) {
             //console.log(`GROUP: ${element.attributes['data-name']}`)
+            let groupSize = getGroupSize(element)
             let group = [
                 `\n${Align(tabs)}class ${element.attributes['data-name']} {\n`,
-                `${Align(tabs + 1)}COOPR_FULLSCREEN{\n`,
+                `${Align(tabs + 1)}COOPR_POSITION${((inGroup) ? '_CT' : '')}(${groupSize[0]},${groupSize[1]},${groupSize[2]},${groupSize[3]})\n`,
                 `${Align(tabs + 1)}class Controls {\n`,
-                `${ParseControls(element.children, (tabs + 2))}`,
+                `${ParseControls(element.children, (tabs + 2), true, groupSize)}`,
                 `${Align(tabs + 1)}};\n`,
                 `${Align(tabs)}};\n`
             ]
             result.push(group.join(''))
         } else if (element.attributes.id) {
             let Values = (Object.values(element.attributes))
-            let regex = /([0-6000])\w+/g
-            let Positions = [(((typeof (Values[4].match(regex)[0])) === "undefined") ? 0 : (Values[4].match(regex)[0])), (((typeof (Values[4].match(regex)[1])) === "undefined") ? 0 : (Values[4].match(regex)[1]))]
+            let Positions = [
+                Values[4].slice(9,Values[4].length).replace('(', '').replace(')', '').split(' ')[0], 
+                Values[4].slice(9,Values[4].length).replace('(', '').replace(')', '').split(' ')[1],
+                element.attributes.width,
+                element.attributes.height
+            ]
+
+            if (inGroup) {
+                console.log(GroupPositions)
+                Positions = [
+                    Values[4].slice(9,Values[4].length).replace('(', '').replace(')', '').split(' ')[0] - GroupPositions[0], 
+                    Values[4].slice(9,Values[4].length).replace('(', '').replace(')', '').split(' ')[1] - GroupPositions[1],
+                    element.attributes.width,
+                    element.attributes.height
+                ]
+            }
+            console.log(Values[1] + ': ' + Positions)
             let form = [
                 `\n${Align(tabs)}class ${element.attributes['data-name']} {\n`,
-                `${Align(tabs + 1)}COOPR_POSITION(${Positions[0]},${Positions[1]},${element.attributes.width},${element.attributes.height})\n`,
+                `${Align(tabs + 1)}COOPR_POSITION${((inGroup) ? '_CT' : '')}(${Positions[0]},${Positions[1]},${Positions[2]},${Positions[3]})\n`,
                 `${Align(tabs)}};\n`
             ]
             result.push(form.join(''))
@@ -43,11 +85,12 @@ function ParseControls(data, tabs) {
 }
 
 function ParseGUI(data) {
-    let patfh = "3443"
+    let patfh = "3443" //Yes?
     parse(data).then(object => {
         let Dialog = object.children[1].attributes.id
         let Config = [
             `class ${Dialog} {\n`,
+            `${Align(1)}idd = -1;\n`,
             `${Align(1)} class Controls {\n`,
             `${ParseControls(object.children[1].children, 2)}`,
             `${Align(1)}};\n`,
@@ -91,6 +134,7 @@ io.on('connection', function (socket) {
             let Dialog = object.children[1].attributes.id
             let Config = [
                 `class ${Dialog} {\n`,
+                `${Align(1)}idd = -1;\n`,
                 `${Align(1)} class Controls {\n`,
                 `${ParseControls(object.children[1].children, 2)}`,
                 `${Align(1)}};\n`,
