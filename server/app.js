@@ -13,6 +13,8 @@ function isGroup(data) {
     return ((data.name === 'g') ? true : false)
 }
 
+
+//https://stackoverflow.com/a/23398499
 function getMinMaxOf2DIndex (arr, idx) {
     return {
         min: Math.min.apply(null, arr.map(function (e) { return e[idx]})),
@@ -39,17 +41,16 @@ function getGroupSize(data) {
     return Position
 }
 
-function ParseControls(data, tabs, inGroup, GroupPositions) {
+function ParseControls(data, tabs, inGroup, GroupPositions, tag) {
     let result = []
     data.forEach(element => {
         if (isGroup(element)) {
-            //console.log(`GROUP: ${element.attributes['data-name']}`)
             let groupSize = getGroupSize(element)
             let group = [
                 `\n${Align(tabs)}class ${element.attributes['data-name']} {\n`,
-                `${Align(tabs + 1)}COOPR_POSITION${((inGroup) ? '_CT' : '')}(${groupSize[0]},${groupSize[1]},${groupSize[2]},${groupSize[3]})\n`,
+                `${Align(tabs + 1)}${tag}_POSITION${((inGroup) ? '_CT' : '')}(${groupSize[0]},${groupSize[1]},${groupSize[2]},${groupSize[3]})\n`,
                 `${Align(tabs + 1)}class Controls {\n`,
-                `${ParseControls(element.children, (tabs + 2), true, groupSize)}`,
+                `${ParseControls(element.children, (tabs + 2), true, groupSize, tag)}`,
                 `${Align(tabs + 1)}};\n`,
                 `${Align(tabs)}};\n`
             ]
@@ -64,7 +65,6 @@ function ParseControls(data, tabs, inGroup, GroupPositions) {
             ]
 
             if (inGroup) {
-                console.log(GroupPositions)
                 Positions = [
                     Values[4].slice(9,Values[4].length).replace('(', '').replace(')', '').split(' ')[0] - GroupPositions[0], 
                     Values[4].slice(9,Values[4].length).replace('(', '').replace(')', '').split(' ')[1] - GroupPositions[1],
@@ -72,10 +72,9 @@ function ParseControls(data, tabs, inGroup, GroupPositions) {
                     element.attributes.height
                 ]
             }
-            console.log(Values[1] + ': ' + Positions)
             let form = [
                 `\n${Align(tabs)}class ${element.attributes['data-name']} {\n`,
-                `${Align(tabs + 1)}COOPR_POSITION${((inGroup) ? '_CT' : '')}(${Positions[0]},${Positions[1]},${Positions[2]},${Positions[3]})\n`,
+                `${Align(tabs + 1)}${tag}_POSITION${((inGroup) ? '_CT' : '')}(${Positions[0]},${Positions[1]},${Positions[2]},${Positions[3]})\n`,
                 `${Align(tabs)}};\n`
             ]
             result.push(form.join(''))
@@ -107,9 +106,6 @@ function ParseGUI(data) {
             if (err) throw err;
         })*/
         patfh = `/public/temp/__temp_${Dialog}_${now}.html`
-        console.log(patfh)
-    }).then(e => {
-        console.log('end')
     })
 }
 
@@ -128,20 +124,53 @@ server.listen(port)
 console.log(`Server Started on ${ip.address()}:${port}`)
 
 io.on('connection', function (socket) {
-    socket.on('svg', function (data) {
+    socket.on('svg', function (data, credits, defines, tag) {
         //ParseGUI(data)
         parse(data).then(object => {
+            let now = new Date().getTime()
             let Dialog = object.children[1].attributes.id
-            let Config = [
+            let Config = [];
+            if (credits) {
+                Config.push([
+                    `/*\n`,
+                    ` * Generated with XD2A3 (by Heyoxe)\n`,
+                    ` * GitHub: https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config\n`,
+                    ` * BI Forum Post: https://forums.bohemia.net/forums/forum/163-arma-3-community-made-utilities/\n`,
+                    ` *\n`,
+                    ` * Generated on ${new Date(now).toUTCString()}\n`,
+                    ` */\n`,
+                    `\n`,
+                ].join(''))
+            }
+            if (defines) {
+                let Name = tag
+                Config.push([
+                    `#define ${Name}_POSITION(X,Y,W,H) \\\n`,
+                    `${Align(1)}x = #((((X * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0) + safeZoneX); \\\n`,
+                    `${Align(1)}y = #((((Y * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1) + safeZoneY); \\\n`,
+                    `${Align(1)}w = #((((W * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\\n`,
+                    `${Align(1)}h = #((((H * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1));\n`,
+                    `\n`,
+                    `#define ${Name}_POSITION_CT(X,Y,W,H) \\\n`,
+                    `${Align(1)}x = #((((X * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\\n`,
+                    `${Align(1)}y = #((((Y * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1)); \\\n`,
+                    `${Align(1)}w = #((((W * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\\n`,
+                    `${Align(1)}h = #((((H * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1));\n`,
+                    `\n`
+                ].join(''))
+            } else {
+                tag = "COOPR"
+            }
+
+            Config.push([
                 `class ${Dialog} {\n`,
                 `${Align(1)}idd = -1;\n`,
-                `${Align(1)} class Controls {\n`,
-                `${ParseControls(object.children[1].children, 2)}`,
+                `${Align(1)}class Controls {\n`,
+                `${ParseControls(object.children[1].children, 2, false, [], tag)}`,
                 `${Align(1)}};\n`,
                 `};`
-            ]
+            ].join(''))
     
-            let now = new Date().getTime()
             fs.writeFileSync(`${__dirname}/public/temp/__temp_${Dialog}_${now}.hpp`, Config.join(''), err => {
                 if (err) throw err;
             })
@@ -181,7 +210,3 @@ app.get('*', (req, res) => {
         })
     }
 })
-
-/*fs.readFile('CoopR_Supply_Dialog.svg', 'utf8', (err, fileContent) => {
-    ParseGUI(fileContent)
-})*/

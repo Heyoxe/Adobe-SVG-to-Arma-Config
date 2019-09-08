@@ -14,14 +14,16 @@
         </div>
         <div class="title">
             <div class="center" id="title">You can only use GROUPS or Rectangles</div>
-            <input id="input" type="file" accept=".svg">
+            <input id="file" type="file" accept=".svg"><br>
+            <input id="credits" type="checkbox" name="credits" value="true" checked="true"> Include Credits<br>
+            <input id="defines" type="checkbox" name="defines" value="true" checked="true"> Include Defines<br>
+            Defines TAG: <input id="tag" type="text" name="tag" placeholder="COOPR"><br>
         </div>
         <script src="/socket.io/socket.io.js"></script>
         <script>
           let socket = io(`${document.URL}`)
-          let input = document.getElementById('input');
+          let input = document.getElementById('file');
           socket.on('converted', data => {
-            console.log(data)
             window.open(data)
           })
           input.type = 'file';
@@ -31,7 +33,8 @@
               reader.readAsText(file,'UTF-8')
               reader.onload = readerEvent => {
                   let content = readerEvent.target.result
-                  socket.emit('svg', content)
+                  let tag = (document.getElementById("tag").value == "") ? "COOPR" : document.getElementById("tag").value
+                  socket.emit('svg', content, document.getElementById("credits").checked, document.getElementById("defines").checked, tag)
               }
           }
           input.click();
