@@ -134,8 +134,9 @@ io.on('connection', function (socket) {
                 Config.push([
                     `/*\n`,
                     ` * Generated with XD2A3 (by Heyoxe)\n`,
+                    ` * Discord: https://discord.gg/5pPEnb`,
                     ` * GitHub: https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config\n`,
-                    ` * BI Forum Post: https://forums.bohemia.net/forums/forum/163-arma-3-community-made-utilities/\n`,
+                    ` * BI Forum Post: soon\n`,
                     ` *\n`,
                     ` * Generated on ${new Date(now).toUTCString()}\n`,
                     ` */\n`,
