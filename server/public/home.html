@@ -1,43 +1,60 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Adobe to Arma Converter - Home</title>
-        <link rel="stylesheet" href="/public/style.css">
-    </head>
-    <body>
-        <audio preload="auto" id="player" src=""></audio>
-        <div class="topnav">
-            <a class="active" href="/">Home</a>
-        </div>
-        <div class="title">
-            <div class="center" id="title">You can only use GROUPS or Rectangles</div>
-            <input id="file" type="file" accept=".svg"><br>
-            <input id="credits" type="checkbox" name="credits" value="true" checked="true"> Include Credits<br>
-            <input id="defines" type="checkbox" name="defines" value="true" checked="true"> Include Defines<br>
-            Defines TAG: <input id="tag" type="text" name="tag" placeholder="COOPR"><br>
-        </div>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-          let socket = io(`${document.URL}`)
-          let input = document.getElementById('file');
-          socket.on('converted', data => {
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Adobe to Arma Converter - Home</title>
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+
+<body>
+    <audio preload="auto" id="player" src=""></audio>
+    <div class="topnav">
+        <a class="active" href="/">Home</a>
+    </div>
+    <div class="title">
+        <div class="center" id="title">You can only use GROUPS or Rectangles</div>
+        <input id="file" type="file" accept=".svg"><br>
+        <input id="credits" type="checkbox" name="credits" value="true" checked="true"> Include Credits<br>
+        <input id="defines" type="checkbox" name="defines" value="true" checked="true"> Include Defines<br>
+        Defines TAG: <input id="tag" type="text" name="tag" placeholder="COOPR"><br>
+        Root IDD: <input id="idd" type="text" > (IDD of the Dialogwill be the Root IDD and every controls inside would be ROOT_IDC + n)<br>
+        <input id="useidd" type="checkbox" value="true"> Generate IDD/IDCs<br>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io(`${document.URL}`)
+        let input = document.getElementById('file');
+        socket.on('converted', data => {
             window.open(data)
-          })
-          input.type = 'file';
-          input.onchange = e => { 
-              let file = e.target.files[0];
-              let reader = new FileReader()
-              reader.readAsText(file,'UTF-8')
-              reader.onload = readerEvent => {
-                  let content = readerEvent.target.result
-                  let tag = (document.getElementById("tag").value == "") ? "COOPR" : document.getElementById("tag").value
-                  socket.emit('svg', content, document.getElementById("credits").checked, document.getElementById("defines").checked, tag)
-              }
-          }
-          input.click();
-      </script>
-    </body>
+        })
+
+        rootidd = document.getElementById("idd")
+        function getRandomInt(min, max) {
+            return Math.floor( Math.random() * (+max - +min) + +min);
+        }
+        function RandomIDD() {
+            let randomNumber = getRandomInt(10000, 50000);
+            return randomNumber
+        }
+        rootidd.value = RandomIDD()
+        console.log(rootidd.value)
+
+        input.type = 'file';
+        input.onchange = e => {
+            let file = e.target.files[0];
+            let reader = new FileReader()
+            reader.readAsText(file, 'UTF-8')
+            reader.onload = readerEvent => {
+                let content = readerEvent.target.result
+                let tag = (document.getElementById("tag").value == "") ? "COOPR" : document.getElementById("tag").value
+                socket.emit('svg', content, document.getElementById("credits").checked, document.getElementById("defines").checked, tag, document.getElementById("idd").value, document.getElementById("useidd").checked)
+            }
+        }
+        input.click();
+    </script>
+</body>
+
 </html>
