@@ -78,25 +78,43 @@ function ParseControls(forms) {
     return result
 }
 
-function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag) {
+function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList) {
     let result = new Array()
+    let IDXList = new Array()
+    IDXList = IDXList.concat(idxsList)
     data.forEach(element => {
+        rootIDX += 1
         if (element.length === 3) {
             let Control = new Array(`${Align(tabs)}class ${element[0]} {`)
+            if (addIDXs) {
+                Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[2] : rootIDX};`)
+                if (useIDXsMacros) {
+                    IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[2]} ${rootIDX}`)
+                }
+            }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[1][0]},${element[1][1]},${element[1][2]},${element[1][3]})`)
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
         } else if (element.length === 4) {
             let Control = new Array(`${Align(tabs)}class ${element[0]} {`)
+            if (addIDXs) {
+                Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3] : rootIDX};`)
+                if (useIDXsMacros) {
+                    IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3]} ${rootIDX}`)
+                }
+            }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[1][0]},${element[1][1]},${element[1][2]},${element[1][3]})`)
             Control.push(`${Align(tabs + 1)}class Controls {`)
-            Control.push(BuildControls(element[2], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[3], tag)[0].join(`\n`))
+            Controls = BuildControls(element[2], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[3], tag, [])
+            rootIDX = Controls[1]
+            IDXList = IDXList.concat(Controls[2])
+            Control.push(Controls[0].join(`\n`))
             Control.push(`${Align(tabs + 1)}};`)
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
         }
     })
-    return [result]
+    return [result, rootIDX, IDXList]
 }
 
 function ParseGUI(svgraw, time) {
@@ -111,8 +129,6 @@ function ParseGUI(svgraw, time) {
             `Website: http://xd2a3.heyoxe.ch/`,
         ]
         let Header = [
-            `#include "IDXs.h`,
-            ``,
             `#define %TAG%_POSITION(X,Y,W,H) \\`,
             `${Align(1)}x = #((((X * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0) + safeZoneX); \\`,
             `${Align(1)}y = #((((Y * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1) + safeZoneY); \\`,
@@ -160,6 +176,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
     let time = new Date().getTime()
     let timeReadable = new Date(time).toUTCString()
     let Render = new Array()
+    let IDXsList = new Array()
 
     if (addCredits) {
         let Credits = new Array('/*')
@@ -171,7 +188,21 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         Render.push(Credits)
     }
 
+    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [])
+    if (separateIDXsMacros) {
+        Render.push(`/* Includes */`)
+        Render.push(`#include "IDXs.h`)
+        Controls[2].splice(0, 0, `#define ${definesTag}_IDD_${data[0]} ${rootIDX}`)
+        IDXsList.push(Controls[2].join(`\n`))
+    } else {
+        Render.push(`/* IDD/IDCs Macros */`)
+        Controls[2].splice(0, 0, `#define ${definesTag}_IDD_${data[0]} ${rootIDX}`)
+        Controls[2].push('')
+        Render.push(Controls[2].join(`\n`))
+    }
+
     if (addDefines) {
+        Render.push(`/* Positions Macros */`)
         let Defines = new Array()
         data[2].forEach(element => {
             Defines.push(element)
@@ -185,13 +216,13 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         `class ${data[3]} {`,
         `${Align(1)}idd = ${rootIDX};`,
         `${Align(1)}class Controls {`,
-        `${BuildControls(data[4], addIDXs, rootIDX, useIDXsMacros, 2, false, '', definesTag)[0].join('\n')}`,
+        `${Controls[0].join('\n')}`,
         `${Align(1)}};`,
         `};`
     ]
     Render.push(Dialog.join('\n'))  
 
-    return Render.join('\n')
+    return [Render.join('\n'), IDXsList]
 }
 
 
@@ -241,7 +272,8 @@ io.on('connection', function (socket) {
         //ParseGUI(data)[4]
         let time = new Date().getTime()
         let parsedGUI = ParseGUI(data, time)
-        let result = BuildGUI(parsedGUI, true, true, 'EBA', false, -1, false, false)
+        //data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros
+        let result = BuildGUI(parsedGUI, true, true, 'EBA', true, 22000, true, false)[0]
         console.log(result)
     })
 })
@@ -260,7 +292,7 @@ app.get('*', (req, res) => {
             }
         })
     } else if (url.startsWith('/public/temp')) {
-        res.download(`${__dirname}${req._parsedUrl.pathname}`, `${req._parsedUrl.query}.hpp`, e => {
+        res.download(`${__dirname}${req._parsedUrl.pathname}`, `${req._parsedUrl.query}`, e => {
             fs.unlinkSync(`${__dirname}${req._parsedUrl.pathname}`)
         })
     } else {
