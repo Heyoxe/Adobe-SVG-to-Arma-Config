@@ -6,6 +6,7 @@ function Align(tabs) {
     return result.join('')
 }
 
+//Transform SVG to JSON and return dimensions, id, name and all elements
 function ExtractSVGData(svgraw) {
     let SVG = parseSync(svgraw)
     let ViewBox = SVG.attributes.viewBox.split(' ')
@@ -35,6 +36,8 @@ function RelativePosition(controlPos, groupPos) {
     return [x, y, w, h]
 }
 
+
+//Generates Controls from elements
 function ParseControls(forms) {
     let result = new Array()
     forms.forEach(item => {
@@ -78,6 +81,7 @@ function ParseControls(forms) {
     return result
 }
 
+//Build main dialog control class
 function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList) {
     let result = new Array()
     let IDXList = new Array()
@@ -117,6 +121,8 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
     return [result, rootIDX, IDXList]
 }
 
+
+//Generates GUI's "Elements"
 function ParseGUI(svgraw, time) {
     let SVGData = ExtractSVGData(svgraw)
     if (SVGData[0].toString() !== ['1920', '1080'].toString()) {
@@ -150,6 +156,7 @@ function ParseGUI(svgraw, time) {
     }
 }
 
+//Transform "ID" to "Classname"
 function TransformClass(data) {
     if (data.includes(':_')) {
         return data.replace(':_', ': ')
@@ -158,6 +165,7 @@ function TransformClass(data) {
     }
 }
 
+//Extract Positions from "translate(X Y)"
 function ParsePositions(data) {
     let x = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[0]) : 0
     let y = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[1]) : 0
@@ -174,6 +182,7 @@ function getMinMaxOf2DIndex(arr, idx) {
     }
 }
 
+//Build the final GUI
 function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros) {
     let time = new Date().getTime()
     let timeReadable = new Date(time).toUTCString()
