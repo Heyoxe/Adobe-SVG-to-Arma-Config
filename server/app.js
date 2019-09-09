@@ -231,6 +231,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
                 Controls[2].push('')
                 Render.push(Controls[2].join(`\n`))
             }
+            //rootIDX = `${definesTag}_IDD_${data[0].substring(0, data[0].length - 1)}`
             rootIDX = `${definesTag}_IDD_${data[0]}`
         }
     } else {
