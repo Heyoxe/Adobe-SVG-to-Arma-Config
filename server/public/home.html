@@ -1,43 +1,70 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Adobe to Arma Converter - Home</title>
-        <link rel="stylesheet" href="/public/style.css">
-    </head>
-    <body>
-        <audio preload="auto" id="player" src=""></audio>
-        <div class="topnav">
-            <a class="active" href="/">Home</a>
-        </div>
-        <div class="title">
-            <div class="center" id="title">You can only use GROUPS or Rectangles</div>
-            <input id="file" type="file" accept=".svg"><br>
-            <input id="credits" type="checkbox" name="credits" value="true" checked="true"> Include Credits<br>
-            <input id="defines" type="checkbox" name="defines" value="true" checked="true"> Include Defines<br>
-            Defines TAG: <input id="tag" type="text" name="tag" placeholder="COOPR"><br>
-        </div>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-          let socket = io(`${document.URL}`)
-          let input = document.getElementById('file');
-          socket.on('converted', data => {
-            window.open(data)
-          })
-          input.type = 'file';
-          input.onchange = e => { 
-              let file = e.target.files[0];
-              let reader = new FileReader()
-              reader.readAsText(file,'UTF-8')
-              reader.onload = readerEvent => {
-                  let content = readerEvent.target.result
-                  let tag = (document.getElementById("tag").value == "") ? "COOPR" : document.getElementById("tag").value
-                  socket.emit('svg', content, document.getElementById("credits").checked, document.getElementById("defines").checked, tag)
-              }
-          }
-          input.click();
-      </script>
-    </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>XD2A3- Home</title>
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+
+<body>
+    <audio preload="auto" id="player" src=""></audio>
+    <div class="topnav">
+        <a class="active" href="/">Home</a>
+    </div>
+    <div class="title">
+        <div class="center" id="title">XD2A3</div>
+        <input id="addCredits" type="checkbox" checked="true"> Add Credits
+        <input id="addDefines" type="checkbox" checked="true"> Add Positions Defines<br>
+        <input id="definesTag" type="text" value="COOPR"> Defines TAG<br>
+        <input id="addIDXs" type="checkbox" checked="true"> Generate IDD/IDCs
+        <input id="useIDXsMacros" type="checkbox" checked="true"> Use Macros for IDD/IDCs<br>
+        <input id="rootIDX" type="text" value=""> Base IDD<br>
+        <input id="separateIDXsMacros" type="checkbox"> Separate IDD/IDCs Macros in another file<br>
+        <input id="file" type="file" accept=".svg"> Select a file<br>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+    <script>
+        let socket = io(`${document.URL}`)
+        let input = document.getElementById('file');
+        socket.on('converted', data => {
+            download(data[0], data[1])
+            //window.open(`${data[0]}?${data[1]}`)
+            //socket.emit('downloaded', (data[0]))
+        })
+
+        rootidd = document.getElementById("rootIDX")
+        function getRandomInt(min, max) {
+            return Math.floor( Math.random() * (+max - +min) + +min);
+        }
+        function RandomIDD() {
+            let randomNumber = getRandomInt(10000, 50000);
+            return randomNumber
+        }
+        rootidd.value = RandomIDD()
+
+        input.type = 'file';
+        input.onchange = e => {
+            let file = e.target.files[0];
+            let reader = new FileReader()
+            reader.readAsText(file, 'UTF-8')
+            reader.onload = readerEvent => {
+                let content = readerEvent.target.result
+                let addCredits = document.getElementById("addCredits").checked
+                let addDefines = document.getElementById("addDefines").checked
+                let definesTag = (document.getElementById("definesTag").value == "") ? "COOPR" : document.getElementById("definesTag").value
+                let addIDXs = document.getElementById("addIDXs").checked
+                let useIDXsMacros = document.getElementById("useIDXsMacros").checked
+                let rootIDX = (document.getElementById("rootIDX").value == "") ? Number("-1") : Number(document.getElementById("rootIDX").value)
+                let separateIDXsMacros = document.getElementById("separateIDXsMacros").checked
+                socket.emit('svg', content, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros)
+            }
+        }
+    </script>
+</body>
+
 </html>
