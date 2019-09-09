@@ -49,12 +49,29 @@ function ParseControls(forms) {
             ControlChildrens.forEach(element => {
                 ControlPosition.push(element[1])
             })
+
             ControlPosition = ([
                 getMinMaxOf2DIndex(ControlPosition, 0).min, 
-                getMinMaxOf2DIndex(ControlPosition, 1).min, 
-                getMinMaxOf2DIndex(ControlPosition, 2).max, 
-                getMinMaxOf2DIndex(ControlPosition, 3).max
+                getMinMaxOf2DIndex(ControlPosition, 1).min
             ])
+            
+            let w = 0
+            let h = 0
+            //console.log(ControlPosition)
+            ControlChildrens.forEach(element => {
+                element.forEach(item => {
+                    if (typeof item[0] === typeof 0) {
+                        if (((item[0] - ControlPosition[0]) + item[2]) > w) {
+                            w = (item[0] - ControlPosition[0]) + item[2]
+                        }
+                        if (((item[1] - ControlPosition[1]) + item[3]) > h) {
+                            h = (item[1] - ControlPosition[1]) + item[3]
+                        }
+                    }
+                })
+            })
+            ControlPosition.push(w, h)
+
             result.push([
                 ControlClass, 
                 ControlPosition, 
@@ -135,6 +152,7 @@ function ParseGUI(svgraw, time) {
             `Forum Thread: soon`,
             `Discord: https://discord.gg/QDGatN2`,
             `Website: http://xd2a3.heyoxe.ch/`,
+            `Licence: CC/BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)`
         ]
         let Header = [
             `#define %TAG%_POSITION(X,Y,W,H) \\`,
@@ -204,7 +222,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         if (useIDXsMacros) {
             if (separateIDXsMacros) {
                 Render.push(`/* Includes */`)
-                Render.push(`#include "IDXs.h`)
+                Render.push(`#include "IDXs.h`, ``)
                 Controls[2].splice(0, 0, `#define ${definesTag}_IDD_${data[0]} ${rootIDX}`)
                 IDXsList.push(Controls[2].join(`\n`))
             } else {
@@ -213,13 +231,14 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
                 Controls[2].push('')
                 Render.push(Controls[2].join(`\n`))
             }
+            rootIDX = `${definesTag}_IDD_${data[0]}`
         }
     } else {
         rootIDX = -1
     }
 
     if (addDefines) {
-        Render.push(`/* Positions Macros */`)
+        Render.push(`/* Positions Macros */`, `//Macros by Heyoxe (https://steamcommunity.com/id/Heyoxe/). Former TAG was EBA_`)
         let Defines = new Array()
         data[2].forEach(element => {
             Defines.push(element)
