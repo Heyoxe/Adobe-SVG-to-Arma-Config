@@ -5,7 +5,8 @@
 ### Limitations
 1.	XD2A3 **will not** accept Artboards format other than **1920x1080**
 2.	XD2A3 **will not** export elements other than **Rectangles** or **Groups**
-3.	XD2A3 **will not** export your GUI if you don't name your elements (that's more related to the way that Adobe XD works)
+3.	XD2A3 **may or may not** export your GUI if you don't name your elements
+4.	XD2A3 **will not** export your GUI if you have borders on any of your element
 
 	**How do I know if my SVG is not compatible?** If you upload it and nothing happens, it's not. If you think that you've followed all the steps correctly, please open an Issue on GitHub
 ------------
