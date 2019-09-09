@@ -289,15 +289,17 @@ io.on('connection', function (socket) {
     socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros) => {
         //ParseGUI(data)[4]
         let time = new Date().getTime()
-        let parsedGUI = ParseGUI(data, time)
-        let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros)
-        let DialogContent = result[0]
-        let Dialog = parsedGUI[0]
-        let IDXsList = result[1][0]
-        if (separateIDXsMacros) {
-            socket.emit('converted', [IDXsList, 'IDXs.hpp']);
-        }
-        socket.emit('converted', [DialogContent, `${Dialog}.hpp`]);
+        try {
+            let parsedGUI = ParseGUI(data, time)
+            let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros)
+            let DialogContent = result[0]
+            let Dialog = parsedGUI[0]
+            let IDXsList = result[1][0]
+            if (separateIDXsMacros) {
+                socket.emit('converted', [IDXsList, 'IDXs.hpp']);
+            }
+            socket.emit('converted', [DialogContent, `${Dialog}.hpp`]);
+        } catch {}
     })
 })
 
