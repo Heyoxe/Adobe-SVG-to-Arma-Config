@@ -149,7 +149,7 @@ function ParseGUI(svgraw, time) {
             `Generated with XD2A3 (xd2a3.heyoxe.ch) on %NOW%`,
             ``,
             `GitHub Repository: https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config`,
-            `Forum Thread: soon`,
+            `Forum Thread: https://forums.bohemia.net/forums/topic/225459-adobe-xd-to-arma-3-convert-your-adobe-xd-guis-to-arma-3-sort-of/`,
             `Discord: https://discord.gg/QDGatN2`,
             `Website: http://xd2a3.heyoxe.ch/`,
             `Licence: CC/BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)`
