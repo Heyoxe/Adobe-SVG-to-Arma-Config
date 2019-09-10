@@ -1,0 +1,17 @@
+#define COOPR_IDD_CoopR_Supply_Dialog 15979
+#define COOPR_IDC_Help 15980
+#define COOPR_IDC_Create 15981
+#define COOPR_IDC_Background 15982
+#define COOPR_IDC_Title 15983
+#define COOPR_IDC_Back 15984
+#define COOPR_IDC_Misc 15985
+#define COOPR_IDC_Misc_SearchButton 15986
+#define COOPR_IDC_Misc_SearchInput 15987
+#define COOPR_IDC_AvailableElements 15988
+#define COOPR_IDC_AvailableElements_AvailableElementsNumber 15989
+#define COOPR_IDC_AvailableElements_AvailableElementsAdd 15990
+#define COOPR_IDC_AvailableElements_AvailableElementsList 15991
+#define COOPR_IDC_RequestedElements 15992
+#define COOPR_IDC_RequestedElements_RequestedElementsNumber 15993
+#define COOPR_IDC_RequestedElements_RequestedElementsRemove 15994
+#define COOPR_IDC_RequestedElements_RequestedElementsList 15995

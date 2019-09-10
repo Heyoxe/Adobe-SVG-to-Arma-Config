@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <clipPath id="clip-CoopR_Supply_Dialog">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+  </defs>
+  <g id="CoopR_Supply_Dialog" clip-path="url(#clip-CoopR_Supply_Dialog)">
+    <rect width="1920" height="1080" fill="#fff"/>
+    <rect id="Help:_COOPR_Button" data-name="Help: COOPR_Button" width="118" height="22" transform="translate(0 1058)" fill="#1c99c7"/>
+    <rect id="Create:_COOPR_Button_Center" data-name="Create: COOPR_Button_Center" width="899" height="72" transform="translate(523 672)" fill="#1c99c7"/>
+    <rect id="Background:_COOPR_Background" data-name="Background: COOPR_Background" width="899" height="436" transform="translate(523 236)" fill="rgba(0,0,0,0.6)"/>
+    <rect id="Title:_COOPR_Title" data-name="Title: COOPR_Title" width="899" height="35" transform="translate(523 201)" fill="rgba(28,153,199,0.9)"/>
+    <rect id="Back:_COOPR_ButtonPicture" data-name="Back: COOPR_ButtonPicture" width="35" height="35" transform="translate(1388 201)" fill="#146887"/>
+    <g id="Misc:_COOPR_ControlsGroup" data-name="Misc: COOPR_ControlsGroup">
+      <rect id="SearchButton:_COOPR_ButtonPicture" data-name="SearchButton: COOPR_ButtonPicture" width="29" height="29" transform="translate(1323 638)" fill="#146887"/>
+      <rect id="SearchInput:_COOPR_Input" data-name="SearchInput: COOPR_Input" width="339" height="29" transform="translate(984 638)"/>
+    </g>
+    <g id="AvailableElements:_COOPR_ControlsGroup" data-name="AvailableElements: COOPR_ControlsGroup">
+      <rect id="AvailableElementsNumber:_COOPR_Input" data-name="AvailableElementsNumber: COOPR_Input" width="155" height="29" transform="translate(583 582)"/>
+      <rect id="AvailableElementsAdd:_COOPR_Button" data-name="AvailableElementsAdd: COOPR_Button" width="155" height="29" transform="translate(738 582)" fill="#1c99c7"/>
+      <rect id="AvailableElementsList:_COOPR_Background" data-name="AvailableElementsList: COOPR_Background" width="310" height="314" transform="translate(583 268)" fill="rgba(0,0,0,0.6)"/>
+    </g>
+    <g id="RequestedElements:_COOPR_ControlsGroup" data-name="RequestedElements: COOPR_ControlsGroup">
+      <rect id="RequestedElementsNumber:_COOPR_Input" data-name="RequestedElementsNumber: COOPR_Input" width="155" height="29" transform="translate(1042 582)"/>
+      <rect id="RequestedElementsRemove:_COOPR_Button" data-name="RequestedElementsRemove: COOPR_Button" width="155" height="29" transform="translate(1197 582)" fill="#1c99c7"/>
+      <rect id="RequestedElementsList:_COOPR_Background" data-name="RequestedElementsList: COOPR_Background" width="310" height="314" transform="translate(1042 268)" fill="rgba(0,0,0,0.6)"/>
+    </g>
+  </g>
+</svg>

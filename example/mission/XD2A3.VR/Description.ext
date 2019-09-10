@@ -1,0 +1,2 @@
+#include "gui_base.hpp"
+#include "CoopR_Supply_Dialog.hpp"
