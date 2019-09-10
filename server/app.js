@@ -222,7 +222,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         if (useIDXsMacros) {
             if (separateIDXsMacros) {
                 Render.push(`/* Includes */`)
-                Render.push(`#include "IDXs.h`, ``)
+                Render.push(`#include "IDXs.hpp"`, ``)
                 Controls[2].splice(0, 0, `#define ${definesTag}_IDD_${data[0]} ${rootIDX}`)
                 IDXsList.push(Controls[2].join(`\n`))
             } else {
