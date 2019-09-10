@@ -1,43 +1,100 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Adobe to Arma Converter - Home</title>
-        <link rel="stylesheet" href="/public/style.css">
-    </head>
-    <body>
-        <audio preload="auto" id="player" src=""></audio>
-        <div class="topnav">
-            <a class="active" href="/">Home</a>
-        </div>
-        <div class="title">
-            <div class="center" id="title">You can only use GROUPS or Rectangles</div>
-            <input id="file" type="file" accept=".svg"><br>
-            <input id="credits" type="checkbox" name="credits" value="true" checked="true"> Include Credits<br>
-            <input id="defines" type="checkbox" name="defines" value="true" checked="true"> Include Defines<br>
-            Defines TAG: <input id="tag" type="text" name="tag" placeholder="COOPR"><br>
-        </div>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-          let socket = io(`${document.URL}`)
-          let input = document.getElementById('file');
-          socket.on('converted', data => {
-            window.open(data)
-          })
-          input.type = 'file';
-          input.onchange = e => { 
-              let file = e.target.files[0];
-              let reader = new FileReader()
-              reader.readAsText(file,'UTF-8')
-              reader.onload = readerEvent => {
-                  let content = readerEvent.target.result
-                  let tag = (document.getElementById("tag").value == "") ? "COOPR" : document.getElementById("tag").value
-                  socket.emit('svg', content, document.getElementById("credits").checked, document.getElementById("defines").checked, tag)
-              }
-          }
-          input.click();
-      </script>
-    </body>
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	<title>Adobe XD to Arma 3</title>
+</head>
+
+<body>
+	<div class="container border">
+		<nav class="navbar navbar-expand-lg navbar navbar-dark bg-dark">
+			<a class="navbar-brand" href="/">XD2A3</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item active">
+						<a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config#how-to-use-it">How To Use</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/exporter">Exporter</a>
+					</li>
+					</li>
+					</li>
+				</ul>
+				</form>
+			</div>
+		</nav>
+		<div class="jumbotron ">
+			<div class="container r ">
+				<h1 class="display-5 text-danger  "><strong> NON COMMERCIAL USE ONLY </strong> </h1>
+				<hr class="my-4">
+				<p class="lead">Attribution-NonCommercial-ShareAlike 4.0 International.</p>
+				<a class="btn btn-primary btn-lg" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+					role="button">License</a>
+			</div>
+		</div>
+		<h1 class="text-center display-4">Adobe XD to Arma 3</h1>
+		<div class="container">
+			<h3>Create your GUIs in Adobe XD, export them as SVGs, use them in Arma 3</h3>
+		</div>
+
+		<div class="container">
+			<ol>
+				<ui>
+					<h6><strong>Limitations</strong></h6>
+					<ul>
+						<li>Adobe XD to Arma 3 (XD2A3 hereafter) will not accept Artboards format other than 1920x1080
+						</li>
+						<li>XD2A3 will not export elements other than Rectangles or Groups</li>
+						<li>XD2A3 may or may not export your GUI if you don't name your elements</li>
+						<li>XD2A3 will not export your GUI if you have borders on any of your element</li>
+						<li> <strong>How do I know if my SVG is not compatible?</strong> If you upload it and nothing
+							happens, it's not. If you think that you've followed all the steps correctly, please open an
+							Issue on GitHub</li>
+					</ul>
+				</ui>
+			</ol>
+		</div>
+		<div class="container text-center">
+			<a class="btn btn-primary btn-lg text-center"
+				href="/exporter" role="button">Try Now!</a>
+		</div>
+		<div class="container text-center">
+				<h3> </h3>
+		</div>
+		<nav class="nav flex-column flex-sm-row justify-content-center align-items-center">
+			<a class="nav-link" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode">License</a>
+			<a class="nav-link" href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config">Github</a>
+			<a class="nav-link" href="https://discord.gg/QDGatN2">Discord</a>
+			<a class="nav-link" href="#">BI fourm</a>
+		</nav>
+
+		<!-- Optional JavaScript -->
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+			integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+		</script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+			integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+		</script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+			integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+		</script>
+	</div>
+</body>
 </html>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	<title>Adobe XD to Arma 3 - Exporter</title>
+</head>
+
+<body>
+	<div class="container border">
+		<nav class="navbar navbar-expand-lg navbar navbar-dark bg-dark">
+			<a class="navbar-brand" href="/">XD2A3</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="/">Home</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config#how-to-use-it">How To Use</a>
+					</li>
+					<li class="nav-item active">
+						<a class="nav-link" href="/exporter">Exporter <span class="sr-only">(current)</span></a>
+					</li>
+					</li>
+					</li>
+				</ul>
+				</form>
+			</div>
+		</nav>
+		<div class="jumbotron ">
+			<div class="container ">
+				<h1 class="display-5 text-danger  "><strong> NON COMMERCIAL USE ONLY </strong> </h1>
+				<hr class="my-4">
+				<p class="lead">Attribution-NonCommercial-ShareAlike 4.0 International.</p>
+				<a class="btn btn-primary btn-lg" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+					role="button">License</a>
+			</div>
+		</div>
+
+		<!-- <form class="form-inline">
+        <div class="form-group">
+          <label for="exampleInputName2">Name</label>
+          <input type="text" class="form-control" id="exampleInputName2" placeholder="Jane Doe">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail2">Email</label>
+          <input type="email" class="form-control" id="exampleInputEmail2" placeholder="jane.doe@example.com">
+        </div>
+        <button type="submit" class="btn btn-default">Send invitation</button>
+      </form>       -->
+
+
+		<form>
+			<div class="form-group row">
+				<label for="inputEmail3" class="col-sm-2 col-form-label">Define TAG</label>
+				<div class="col-sm-10">
+					<input type="" class="form-control" id="definesTag" placeholder="COOPR" value="COOPR">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="inputPassword3" class="col-sm-2 col-form-label">Base IDD</label>
+				<div class="col-sm-10">
+					<input type="" class="form-control" id="rootIDX" placeholder="">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="addCredits" checked>
+						<label class="form-check-label" for="gridCheck1">
+							Add Credits
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="addDefines" checked>
+						<label class="form-check-label" for="gridCheck1">
+							Add Positions Defines
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="addIDXs">
+						<label class="form-check-label" for="gridCheck1">
+							Generate IDD/IDCs
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="useIDXsMacros">
+						<label class="form-check-label" for="gridCheck1">
+							Use Macros for IDD/IDCs
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="separateIDXsMacros">
+						<label class="form-check-label" for="gridCheck1">
+							Separate IDD/IDCs Macros in another file
+						</label>
+					</div>
+				</div>
+			</div>
+			<form>
+				<div class="form-group">
+					<input type="file" class="form-control-file" id="file" accept=".svg">
+				</div>
+			</form>
+			<div class="form-group row">
+				<div class="col-sm-10">
+					<button type="submit" class="btn btn-primary" id="downloadBtn" onclick="convert()">Download</button>
+				</div>
+			</div>
+		</form>
+
+		<!-- 
+      <div class="row">
+          <div class="col">
+          1
+
+          </div>
+          <div class="col">
+          2
+
+          </div>
+          <div class="w-100"></div>
+          <div class="col">
+            <form>
+                <div class="form-group">
+                  <label for="exampleFormControlFile1">Example file input </label>
+                  <input type="file" class="form-control-file" id="exampleFormControlFile1">
+                </div>
+            </form>          
+          </div>
+          <div class="col">
+                 
+
+          </div>
+        </div> -->
+
+
+		<nav class="nav flex-column flex-sm-row justify-content-center align-items-center">
+			<a class="nav-link" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode">License</a>
+			<a class="nav-link" href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config">Github</a>
+			<a class="nav-link" href="https://discord.gg/QDGatN2">Discord</a>
+			<a class="nav-link" href="#">BI fourm</a>
+
+		</nav>
+		<!-- Optional JavaScript -->
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+			integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+		</script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+			integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+		</script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+			integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+		</script>
+
+	<!-- XD2A3 Scritps -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+	<script>
+		let socket = io()
+		let input = document.getElementById('file');
+		socket.on('converted', data => {
+			download(data[0], data[1])
+			//window.open(`${data[0]}?${data[1]}`)
+			//socket.emit('downloaded', (data[0]))
+		})
+
+		rootidd = document.getElementById("rootIDX")
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random() * (+max - +min) + +min);
+		}
+
+		function RandomIDD() {
+			let randomNumber = getRandomInt(10000, 50000);
+			return randomNumber
+		}
+		let content = "";
+		rootidd.value = RandomIDD()
+		downloadBtn = document.getElementById('downloadBtn')
+		input.type = 'file';
+		input.onchange = e => {
+			let file = e.target.files[0];
+			let reader = new FileReader()
+			reader.readAsText(file, 'UTF-8')
+			reader.onload = readerEvent => {
+				content = readerEvent.target.result
+			}
+		}
+		function convert() {
+			let addCredits = document.getElementById("addCredits").checked
+			let addDefines = document.getElementById("addDefines").checked
+			let definesTag = (document.getElementById("definesTag").value == "") ? "COOPR" : document.getElementById("definesTag").value
+			let addIDXs = document.getElementById("addIDXs").checked
+			let useIDXsMacros = document.getElementById("useIDXsMacros").checked
+			let rootIDX = (document.getElementById("rootIDX").value == "") ? Number("-1") : Number(document.getElementById("rootIDX").value)
+			let separateIDXsMacros = document.getElementById("separateIDXsMacros").checked
+			socket.emit('svg', content, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros)
+		}
+	</script>
+	</div>
+</body>
+</html>
