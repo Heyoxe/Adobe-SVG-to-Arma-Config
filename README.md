@@ -7,7 +7,7 @@
 
 ### Limitations
 1.	XD2A3 **will not** accept Artboards format other than **1920x1080**
-2.	XD2A3 **will not** export elements other than **Rectangles** or **Groups**
+2.	XD2A3 **will not** export elements other than **Rectangles**, **Texts**, **Images** or **Groups**
 3.	XD2A3 **may or may not** export your GUI if you don't name your elements
 4.	XD2A3 **will not** export your GUI if you have borders on any of your element
 
@@ -30,7 +30,7 @@ For example:
 3.	Export your Selected Artboard with the following Options:
 	- **Format**: SVG
 	- **Styling**: Presentation Attributes
-	- **Save images**: Embed OR Link
+	- **Save images**: Link
 	- **File size**: Normal (do not check)
 4.	Go to [XD2A3 Website](http://xd2a3.heyoxe.ch/ "XD2A3 Website").
 5.	Select your options:
