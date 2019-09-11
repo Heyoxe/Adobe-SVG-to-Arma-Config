@@ -24,8 +24,16 @@ function isGroup(data) {
     return ((data.name === 'g') && (data.attributes.id))
 }
 
-function isControl(data) {
+function isRectangle(data) {
     return ((data.name === 'rect') && (data.attributes.id))
+}
+
+function isImage(data) {
+    return ((data.name === 'image') && (data.attributes.id))
+}
+
+function isText(data) {
+    return ((data.name === 'text') && (data.attributes.id))
 }
 
 function RelativePosition(controlPos, groupPos) {
@@ -51,8 +59,8 @@ function ParseControls(forms) {
             })
 
             ControlPosition = ([
-                getMinMaxOf2DIndex(ControlPosition, 0).min, 
-                getMinMaxOf2DIndex(ControlPosition, 1).min
+                Math.round(getMinMaxOf2DIndex(ControlPosition, 0).min), 
+                Math.round(getMinMaxOf2DIndex(ControlPosition, 1).min)
             ])
             
             let w = 0
@@ -70,9 +78,10 @@ function ParseControls(forms) {
                     }
                 })
             })
-            ControlPosition.push(w, h)
+            ControlPosition.push(Math.round(w), Math.round(h))
 
             result.push([
+                'GROUP',
                 ControlClass, 
                 ControlPosition, 
                 ControlChildrens,
@@ -82,15 +91,30 @@ function ParseControls(forms) {
                 let relativePosition = RelativePosition(element[1], ControlPosition)
                 ControlChildrens[index][1] = relativePosition
             })
-        } else if (isControl(item)) {
+        } else if (isRectangle(item)) {
             let ControlClass = TransformClass(item.attributes.id)   
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
             result.push([
+                'RECT',
                 ControlClass, 
                 ControlPosition,
                 ControlName
             ])
+        } else if (isImage(item)) {
+            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlPosition = ParsePositions(item.attributes)
+            let ControlName = ControlClass.split(': ')[0]
+            let ImagePath = item.attributes["xlink:href"]
+            result.push([
+                'IMAGE',
+                ControlClass, 
+                ControlPosition,
+                ControlName,
+                ImagePath
+            ])           
+        } else if (isText(item)) {
+            console.log(item)
         } else {
             result.push(['ERR_NOT_SUPPORTED_TYPE'])
         }
@@ -105,34 +129,48 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
     IDXList = IDXList.concat(idxsList)
     data.forEach(element => {
         rootIDX += 1
-        if (element.length === 3) {
-            let Control = new Array(`${Align(tabs)}class ${element[0]} {`)
-            if (addIDXs) {
-                Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[2] : rootIDX};`)
-                if (useIDXsMacros) {
-                    IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[2]} ${rootIDX}`)
-                }
-            }
-            Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[1][0]},${element[1][1]},${element[1][2]},${element[1][3]})`)
-            Control.push(`${Align(tabs)}};`)
-            result.push(Control.join('\n'))
-        } else if (element.length === 4) {
-            let Control = new Array(`${Align(tabs)}class ${element[0]} {`)
+        if (element[0] === 'RECT') {
+            let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
             if (addIDXs) {
                 Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3] : rootIDX};`)
                 if (useIDXsMacros) {
                     IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3]} ${rootIDX}`)
                 }
             }
-            Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[1][0]},${element[1][1]},${element[1][2]},${element[1][3]})`)
+            Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
+            Control.push(`${Align(tabs)}};`)
+            result.push(Control.join('\n'))
+        } else if (element[0] === 'GROUP') {
+            let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
+            if (addIDXs) {
+                Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[4] : rootIDX};`)
+                if (useIDXsMacros) {
+                    IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[4]} ${rootIDX}`)
+                }
+            }
+            Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
             Control.push(`${Align(tabs + 1)}class Controls {`)
-            Controls = BuildControls(element[2], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[3], tag, [])
+            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[5], tag, [])
             rootIDX = Controls[1]
             IDXList = IDXList.concat(Controls[2])
             Control.push(Controls[0].join(`\n`))
             Control.push(`${Align(tabs + 1)}};`)
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
+        } else if (element[0] === 'IMAGE') {
+            let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
+            if (addIDXs) {
+                Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3] : rootIDX};`)
+                if (useIDXsMacros) {
+                    IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3]} ${rootIDX}`)
+                }
+            }
+            Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
+            Control.push(`${Align(tabs + 1)}text = "${element[4]}";`)
+            Control.push(`${Align(tabs)}};`)
+            result.push(Control.join('\n'))
+        } else if (element[0] === 'TEXT') {
+
         }
     })
     return [result, rootIDX, IDXList]
@@ -189,7 +227,7 @@ function ParsePositions(data) {
     let y = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[1]) : 0
     let w = (data.width) ? Number(data.width) : 0
     let h = (data.height) ? Number(data.height) : 0
-    return [x, y, w, h]
+    return [Math.round(x), Math.round(y), Math.round(w), Math.round(h)]
 }
 
 //https://stackoverflow.com/a/23398499
