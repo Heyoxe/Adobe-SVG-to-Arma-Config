@@ -130,6 +130,39 @@
 					</div>
 				</div>
 			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="exportImages">
+						<label class="form-check-label" for="gridCheck1">
+							Export Images <strong>!EXPERIMENTAL!</strong>
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="exportText">
+						<label class="form-check-label" for="gridCheck1">
+							Export Text <strong>!EXPERIMENTAL!</strong>
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="addFontSizeMacro">
+						<label class="form-check-label" for="gridCheck1">
+							Add Font Size Macro <strong>!EXPERIMENTAL!</strong>
+						</label>
+					</div>
+				</div>
+			</div>
 			<form>
 				<div class="form-group">
 					<input type="file" class="form-control-file" id="file" accept=".svg">
@@ -229,7 +262,10 @@
 			let useIDXsMacros = document.getElementById("useIDXsMacros").checked
 			let rootIDX = (document.getElementById("rootIDX").value == "") ? Number("-1") : Number(document.getElementById("rootIDX").value)
 			let separateIDXsMacros = document.getElementById("separateIDXsMacros").checked
-			socket.emit('svg', content, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros)
+			let exportImages = document.getElementById("exportImages").checked
+			let exportText = document.getElementById("exportText").checked
+			let addFontSizeMacro = document.getElementById("addFontSizeMacro").checked
+			socket.emit('svg', content, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
 		}
 	</script>
 	</div>

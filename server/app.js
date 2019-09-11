@@ -105,7 +105,7 @@ function ParseControls(forms) {
             let ControlClass = TransformClass(item.attributes.id)   
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
-            let ImagePath = item.attributes["xlink:href"]
+            let ImagePath = item.attributes["xlink:href"].replace(/[\/]/g,'\\')
             result.push([
                 'IMAGE',
                 ControlClass, 
@@ -114,7 +114,32 @@ function ParseControls(forms) {
                 ImagePath
             ])           
         } else if (isText(item)) {
-            console.log(item)
+            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlPosition = ParsePositions(item.attributes)
+            let ControlName = ControlClass.split(': ')[0]
+            let FontSize = Number(item.attributes["font-size"])
+            let CharCount = 0
+            let Text = []
+            item.children.forEach(element => {
+                if ((Math.round(element.children[0].value.length * FontSize * 0.5)) > CharCount) {
+                    CharCount = (Math.round(element.children[0].value.length * FontSize * 0.5))
+                }
+                Text.push(element.children[0].value)
+            })
+            let Lines = Text.length
+            let h = Lines * FontSize * 1.33
+            let w = CharCount
+            ControlPosition[2] = w
+            ControlPosition[3] = h
+            Text = Text.join('\n')
+            result.push([
+                'TEXT',
+                ControlClass, 
+                ControlPosition,
+                ControlName,
+                FontSize,
+                Text
+            ])
         } else {
             result.push(['ERR_NOT_SUPPORTED_TYPE'])
         }
@@ -123,7 +148,7 @@ function ParseControls(forms) {
 }
 
 //Build main dialog control class
-function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList) {
+function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportImages, exportText) {
     let result = new Array()
     let IDXList = new Array()
     IDXList = IDXList.concat(idxsList)
@@ -150,14 +175,14 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
             Control.push(`${Align(tabs + 1)}class Controls {`)
-            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[5], tag, [])
+            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[5], tag, [], exportImages, exportText)
             rootIDX = Controls[1]
             IDXList = IDXList.concat(Controls[2])
             Control.push(Controls[0].join(`\n`))
             Control.push(`${Align(tabs + 1)}};`)
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
-        } else if (element[0] === 'IMAGE') {
+        } else if ((element[0] === 'IMAGE') && exportImages) {
             let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
             if (addIDXs) {
                 Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3] : rootIDX};`)
@@ -169,8 +194,19 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             Control.push(`${Align(tabs + 1)}text = "${element[4]}";`)
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
-        } else if (element[0] === 'TEXT') {
-
+        } else if ((element[0] === 'TEXT') && exportText) {
+            let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
+            if (addIDXs) {
+                Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3] : rootIDX};`)
+                if (useIDXsMacros) {
+                    IDXList.push(`#define ${tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3]} ${rootIDX}`)
+                }
+            }
+            Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
+            Control.push(`${Align(tabs + 1)}sizeEx = ${tag}_FONTZSIZE(${element[4]})`)
+            Control.push(`${Align(tabs + 1)}text = "${element[5]}";`)
+            Control.push(`${Align(tabs)}};`)
+            result.push(Control.join('\n'))
         }
     })
     return [result, rootIDX, IDXList]
@@ -239,7 +275,7 @@ function getMinMaxOf2DIndex(arr, idx) {
 }
 
 //Build the final GUI
-function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros) {
+function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro) {
     let time = new Date().getTime()
     let timeReadable = new Date(time).toUTCString()
     let Render = new Array()
@@ -255,7 +291,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         Render.push(Credits)
     }
 
-    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [])
+    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportImages, exportText)
     if (addIDXs) {
         if (useIDXsMacros) {
             if (separateIDXsMacros) {
@@ -285,6 +321,17 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         Defines.push('')
         Defines = Defines.join('\n').replace(/%TAG%(?=_POSITION)/g, definesTag)
         Render.push(Defines)        
+    }
+
+    if (exportText) {
+        if (addFontSizeMacro) {
+            Render.push(
+                `/* FontSize Macro */`, 
+                `//Macro by Heyoxe (https://steamcommunity.com/id/Heyoxe/). Former TAG was EBA_`,
+                `#define ${definesTag}_FONTZSIZE(SIZE) #(((SIZE * 0.00222222) * (getResolution select 1)) / 1080)`,
+                ''
+            )
+        }
     }
 
 
@@ -325,12 +372,12 @@ server.listen(port)
 
 console.log(`Server Started on ${ip.address()}:${port}`)
 io.on('connection', function (socket) {
-    socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros) => {
+    socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportImages, exportText, addFontSizeMacro) => {
         //ParseGUI(data)[4]
         let time = new Date().getTime()
         try {
             let parsedGUI = ParseGUI(data, time)
-            let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros)
+            let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
             let DialogContent = result[0]
             let Dialog = parsedGUI[0]
             let IDXsList = result[1][0]
