@@ -20,20 +20,37 @@ function ExtractSVGData(svgraw) {
     return [Dimensions, Id, Name, Forms]
 }
 
+
 function isGroup(data) {
+    if (hasBorders(data)) return false
     return ((data.name === 'g') && (data.attributes.id))
 }
 
 function isRectangle(data) {
+    if (hasBorders(data) || !hasPosition(data)) return false
     return ((data.name === 'rect') && (data.attributes.id))
 }
 
 function isImage(data) {
+    if (hasBorders(data) || !hasPosition(data)) return false
     return ((data.name === 'image') && (data.attributes.id))
 }
 
 function isText(data) {
+    if (hasBorders(data) || !hasPosition(data)) return false
     return ((data.name === 'text') && (data.attributes.id))
+}
+
+function isCanvas(data) {
+    return ((data.name === 'rect') && !(data.attributes.id))
+}
+
+function hasBorders(data) {
+    if (data.attributes.stroke) return true
+}
+
+function hasPosition(data) {
+    return (data.attributes.transform)
 }
 
 function RelativePosition(controlPos, groupPos) {
@@ -45,19 +62,25 @@ function RelativePosition(controlPos, groupPos) {
 }
 
 
+
 //Generates Controls from elements
 function ParseControls(forms) {
     let result = new Array()
     forms.forEach(item => {
-        if (isGroup(item)) {
+        if (hasBorders(item)) {
+            result.push(['ERR', 'WRN_ELEMENT_WITH_BORDER', item.attributes.id])
+        } else if (isCanvas(item)) {
+            result.push(['EMPTY', 'EMPTY_CANVAS', -1])
+        } else if (!hasPosition(item) && !isGroup(item)) {
+            result.push(['ERR', 'WRN_CANNOT_FIND_POSITION', item.attributes.id])
+        } else if (isGroup(item)) {
             let ControlClass = TransformClass(item.attributes.id)   
             let ControlPosition = new Array()
             let ControlChildrens = ParseControls(item.children)
             let ControlName = ControlClass.split(': ')[0]
             ControlChildrens.forEach(element => {
-                ControlPosition.push(element[1])
+                ControlPosition.push(element[2])
             })
-
             ControlPosition = ([
                 Math.round(getMinMaxOf2DIndex(ControlPosition, 0).min), 
                 Math.round(getMinMaxOf2DIndex(ControlPosition, 1).min)
@@ -65,7 +88,6 @@ function ParseControls(forms) {
             
             let w = 0
             let h = 0
-            //console.log(ControlPosition)
             ControlChildrens.forEach(element => {
                 element.forEach(item => {
                     if (typeof item[0] === typeof 0) {
@@ -79,7 +101,7 @@ function ParseControls(forms) {
                 })
             })
             ControlPosition.push(Math.round(w), Math.round(h))
-
+            
             result.push([
                 'GROUP',
                 ControlClass, 
@@ -88,8 +110,10 @@ function ParseControls(forms) {
                 ControlName
             ])
             ControlChildrens.forEach((element, index, array) => {
-                let relativePosition = RelativePosition(element[1], ControlPosition)
-                ControlChildrens[index][1] = relativePosition
+                if (element[0] !== 'ERR') {
+                    let relativePosition = RelativePosition(element[2], ControlPosition)
+                    ControlChildrens[index][2] = relativePosition
+                }
             })
         } else if (isRectangle(item)) {
             let ControlClass = TransformClass(item.attributes.id)   
@@ -141,20 +165,22 @@ function ParseControls(forms) {
                 Text
             ])
         } else {
-            result.push(['ERR_NOT_SUPPORTED_TYPE'])
+            result.push(['ERR', 'WRN_NOT_SUPPORTED_TYPE', item.attributes.id])
         }
     })
     return result
 }
 
 //Build main dialog control class
-function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportImages, exportText) {
+function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportImages, exportText, ConversionErrors) {
     let result = new Array()
     let IDXList = new Array()
     IDXList = IDXList.concat(idxsList)
     data.forEach(element => {
         rootIDX += 1
-        if (element[0] === 'RECT') {
+        if (element[0] === 'ERR') {
+            ConversionErrors.push(element)
+        } else if (element[0] === 'RECT') {
             let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
             if (addIDXs) {
                 Control.push(`${Align(tabs + 1)}idc = ${(useIDXsMacros) ? tag + '_IDC_' +  ((inGroup) ? groupName + '_' : '') + element[3] : rootIDX};`)
@@ -175,13 +201,18 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
             Control.push(`${Align(tabs + 1)}class Controls {`)
-            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[5], tag, [], exportImages, exportText)
+            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[4], tag, [], exportImages, exportText, ConversionErrors)
             rootIDX = Controls[1]
+            ConversionErrors = Controls[3]
             IDXList = IDXList.concat(Controls[2])
             Control.push(Controls[0].join(`\n`))
             Control.push(`${Align(tabs + 1)}};`)
             Control.push(`${Align(tabs)}};`)
-            result.push(Control.join('\n'))
+            if (Controls[3].length !== 0) {
+                ConversionErrors.push(['ERR', 'WRN_CANNOT_FIND_POSITION', element[4]])
+            } else {
+                result.push(Control.join('\n'))
+            }
         } else if ((element[0] === 'IMAGE') && exportImages) {
             let Control = new Array(`${Align(tabs)}class ${element[1]} {`)
             if (addIDXs) {
@@ -209,7 +240,7 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             result.push(Control.join('\n'))
         }
     })
-    return [result, rootIDX, IDXList]
+    return [result, rootIDX, IDXList, ConversionErrors]
 }
 
 
@@ -217,7 +248,7 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
 function ParseGUI(svgraw, time) {
     let SVGData = ExtractSVGData(svgraw)
     if (SVGData[0].toString() !== ['1920', '1080'].toString()) {
-        return 'ERR_NOT_SUPPORTED_ASPECT_RATIO'
+        return [false, 'ERR_INVALID_ASPECT_RATIO', []]
     } else {
         let Credits = [
             `Generated with XD2A3 (xd2a3.heyoxe.ch) on %NOW%`,
@@ -291,7 +322,11 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         Render.push(Credits)
     }
 
-    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportImages, exportText)
+    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportImages, exportText, [])
+    ConversionErrors = Controls[3]
+    if (Controls[0].length === 0) {
+        return [false, 'ERR_NO_VALID_CONTROL_FOUND', ConversionErrors]
+    }
     if (addIDXs) {
         if (useIDXsMacros) {
             if (separateIDXsMacros) {
@@ -345,7 +380,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
     ]
     Render.push(Dialog.join('\n'))  
 
-    return [Render.join('\n'), IDXsList, time]
+    return [Render.join('\n'), IDXsList, time, ConversionErrors]
 }
 
 
@@ -377,14 +412,25 @@ io.on('connection', function (socket) {
         let time = new Date().getTime()
         try {
             let parsedGUI = ParseGUI(data, time)
-            let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
-            let DialogContent = result[0]
-            let Dialog = parsedGUI[0]
-            let IDXsList = result[1][0]
-            if (separateIDXsMacros) {
-                socket.emit('converted', [IDXsList, 'IDXs.hpp']);
+            if (parsedGUI[0] === false) {
+                socket.emit('GenerationError', ['ERR', parsedGUI[1]])
+            } else {
+                let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
+                if (result[0] === false) {
+                    socket.emit('GenerationError', ['ERR', result[1]])
+                    socket.emit('ConversionErrors', result[2])
+                } else {
+                    let DialogContent = result[0]
+                    let Dialog = parsedGUI[0]
+                    let IDXsList = result[1][0]
+                    let ConversionErrors = result[3]
+                    if (separateIDXsMacros) {
+                        socket.emit('converted', [IDXsList, 'IDXs.hpp', []]);
+                    }
+                    socket.emit('converted', [DialogContent, `${Dialog}.hpp`, ConversionErrors]);
+                    socket.emit('ConversionErrors', ConversionErrors)
+                }
             }
-            socket.emit('converted', [DialogContent, `${Dialog}.hpp`]);
         } catch {}
     })
 })
