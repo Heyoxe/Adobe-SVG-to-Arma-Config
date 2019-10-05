@@ -74,6 +74,7 @@ function ParseControls(forms) {
         } else if (!hasPosition(item) && !isGroup(item)) {
             result.push(['ERR', 'WRN_CANNOT_FIND_POSITION', item.attributes.id])
         } else if (isGroup(item)) {
+            let GroupOffset = (ParsePositions(item.attributes)).slice(0,2)
             let ControlClass = TransformClass(item.attributes.id)   
             let ControlPosition = new Array()
             let ControlChildrens = ParseControls(item.children)
@@ -115,6 +116,8 @@ function ParseControls(forms) {
                     ControlChildrens[index][2] = relativePosition
                 }
             })
+            ControlPosition[0] += GroupOffset[0]
+            ControlPosition[1] += GroupOffset[1]
         } else if (isRectangle(item)) {
             let ControlClass = TransformClass(item.attributes.id)   
             let ControlPosition = ParsePositions(item.attributes)
