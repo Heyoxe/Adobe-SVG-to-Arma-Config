@@ -200,7 +200,7 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
             if (exportColors && element[4].length > 0) {
-                Control.push(`${Align(tabs + 1)}colorBackground[] = {${element[4][0]},${element[4][1]},${element[4][2]},${element[4][3]}}`)
+                Control.push(`${Align(tabs + 1)}colorBackground[] = {${element[4][0]},${element[4][1]},${element[4][2]},${element[4][3]}};`)
             }
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
