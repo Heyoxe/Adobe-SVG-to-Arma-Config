@@ -126,7 +126,6 @@ function ParseControls(forms) {
             let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
-
             let ControlColor = ColorUtil.parseColors(item.attributes)
 
             result.push([
