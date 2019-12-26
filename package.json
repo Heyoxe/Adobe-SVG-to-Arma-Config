@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "fs": "0.0.1-security",
     "ip": "^1.1.5",
     "node": "^12.9.1",
     "socket.io": "^2.2.0",

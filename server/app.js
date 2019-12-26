@@ -1,7 +1,9 @@
+const ColorUtil = new(require('./util/Colors.js'))()
+
 function Align(tabs) {
     let result = new Array()
     for (let i = 0; i < tabs; i++) {
-        result.push("\t")  
+        result.push("\t")
     }
     return result.join('')
 }
@@ -11,12 +13,13 @@ function ExtractSVGData(svgraw) {
     let SVG = parseSync(svgraw)
     let ViewBox = SVG.attributes.viewBox.split(' ')
     let Dimensions = [
-        ViewBox[2], 
+        ViewBox[2],
         ViewBox[3]
     ]
     let Id = SVG.children[1].attributes.id
     let Name = Id.split(':')[0]
     let Forms = SVG.children[1].children
+
     return [Dimensions, Id, Name, Forms]
 }
 
@@ -65,6 +68,7 @@ function RelativePosition(controlPos, groupPos) {
 
 //Generates Controls from elements
 function ParseControls(forms) {
+
     let result = new Array()
     forms.forEach(item => {
         if (hasBorders(item)) {
@@ -74,8 +78,8 @@ function ParseControls(forms) {
         } else if (!hasPosition(item) && !isGroup(item)) {
             result.push(['ERR', 'WRN_CANNOT_FIND_POSITION', item.attributes.id])
         } else if (isGroup(item)) {
-            let GroupOffset = (ParsePositions(item.attributes)).slice(0,2)
-            let ControlClass = TransformClass(item.attributes.id)   
+            let GroupOffset = (ParsePositions(item.attributes)).slice(0, 2)
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = new Array()
             let ControlChildrens = ParseControls(item.children)
             let ControlName = ControlClass.split(': ')[0]
@@ -83,10 +87,10 @@ function ParseControls(forms) {
                 ControlPosition.push(element[2])
             })
             ControlPosition = ([
-                Math.round(getMinMaxOf2DIndex(ControlPosition, 0).min), 
+                Math.round(getMinMaxOf2DIndex(ControlPosition, 0).min),
                 Math.round(getMinMaxOf2DIndex(ControlPosition, 1).min)
             ])
-            
+
             let w = 0
             let h = 0
             ControlChildrens.forEach(element => {
@@ -102,11 +106,11 @@ function ParseControls(forms) {
                 })
             })
             ControlPosition.push(Math.round(w), Math.round(h))
-            
+
             result.push([
                 'GROUP',
-                ControlClass, 
-                ControlPosition, 
+                ControlClass,
+                ControlPosition,
                 ControlChildrens,
                 ControlName
             ])
@@ -119,29 +123,33 @@ function ParseControls(forms) {
             ControlPosition[0] += GroupOffset[0]
             ControlPosition[1] += GroupOffset[1]
         } else if (isRectangle(item)) {
-            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
+
+            let ControlColor = ColorUtil.parseColors(item.attributes)
+
             result.push([
                 'RECT',
-                ControlClass, 
+                ControlClass,
                 ControlPosition,
-                ControlName
+                ControlName,
+                ControlColor
             ])
         } else if (isImage(item)) {
-            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
-            let ImagePath = item.attributes["xlink:href"].replace(/[\/]/g,'\\')
+            let ImagePath = item.attributes["xlink:href"].replace(/[\/]/g, '\\')
             result.push([
                 'IMAGE',
-                ControlClass, 
+                ControlClass,
                 ControlPosition,
                 ControlName,
                 ImagePath
-            ])           
+            ])
         } else if (isText(item)) {
-            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
             let FontSize = Number(item.attributes["font-size"])
@@ -161,7 +169,7 @@ function ParseControls(forms) {
             Text = Text.join('\n')
             result.push([
                 'TEXT',
-                ControlClass, 
+                ControlClass,
                 ControlPosition,
                 ControlName,
                 FontSize,
@@ -175,7 +183,7 @@ function ParseControls(forms) {
 }
 
 //Build main dialog control class
-function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportImages, exportText, ConversionErrors) {
+function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportColors, exportImages, exportText, ConversionErrors) {
     let result = new Array()
     let IDXList = new Array()
     IDXList = IDXList.concat(idxsList)
@@ -192,6 +200,9 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
                 }
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
+            if (exportColors && element[4].length > 0) {
+                Control.push(`${Align(tabs + 1)}colorBackground[] = {${element[4][0]},${element[4][1]},${element[4][2]},${element[4][3]}}`)
+            }
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
         } else if (element[0] === 'GROUP') {
@@ -204,7 +215,7 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
             Control.push(`${Align(tabs + 1)}class Controls {`)
-            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[4], tag, [], exportImages, exportText, ConversionErrors)
+            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[4], tag, [], exportColors, exportImages, exportText, ConversionErrors)
             rootIDX = Controls[1]
             ConversionErrors = Controls[3]
             IDXList = IDXList.concat(Controls[2])
@@ -273,11 +284,12 @@ function ParseGUI(svgraw, time) {
             `${Align(1)}x = #((((X * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\`,
             `${Align(1)}y = #((((Y * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1)); \\`,
             `${Align(1)}w = #((((W * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\`,
-            `${Align(1)}h = #((((H * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1));`,          
+            `${Align(1)}h = #((((H * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1));`,
         ]
         let DialogClass = TransformClass(SVGData[1])
         let DialogName = TransformClass(SVGData[1]).split(' ')[0]
-        let Controls = ParseControls(SVGData[3])  
+
+        let Controls = ParseControls(SVGData[3])
         return [DialogName, Credits, Header, DialogClass, Controls]
     }
 }
@@ -303,13 +315,17 @@ function ParsePositions(data) {
 //https://stackoverflow.com/a/23398499
 function getMinMaxOf2DIndex(arr, idx) {
     return {
-        min: Math.min.apply(null, arr.map(function (e) { return e[idx]})),
-        max: Math.max.apply(null, arr.map(function (e) { return e[idx]}))
+        min: Math.min.apply(null, arr.map(function (e) {
+            return e[idx]
+        })),
+        max: Math.max.apply(null, arr.map(function (e) {
+            return e[idx]
+        }))
     }
 }
 
 //Build the final GUI
-function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro) {
+function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro) {
     let time = new Date().getTime()
     let timeReadable = new Date(time).toUTCString()
     let Render = new Array()
@@ -319,13 +335,13 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         let Credits = new Array('/*')
         data[1].forEach(element => {
             Credits.push(` * ${element}`)
-        }) 
+        })
         Credits.push(` */`, '')
         Credits = Credits.join('\n').replace('%NOW%', timeReadable)
         Render.push(Credits)
     }
 
-    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportImages, exportText, [])
+    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportColors, exportImages, exportText, [])
     ConversionErrors = Controls[3]
     if (Controls[0].length === 0) {
         return [false, 'ERR_NO_VALID_CONTROL_FOUND', ConversionErrors]
@@ -355,16 +371,16 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         let Defines = new Array()
         data[2].forEach(element => {
             Defines.push(element)
-        }) 
+        })
         Defines.push('')
         Defines = Defines.join('\n').replace(/%TAG%(?=_POSITION)/g, definesTag)
-        Render.push(Defines)        
+        Render.push(Defines)
     }
 
     if (exportText) {
         if (addFontSizeMacro) {
             Render.push(
-                `/* FontSize Macro */`, 
+                `/* FontSize Macro */`,
                 `//Macro by Heyoxe (https://steamcommunity.com/id/Heyoxe/). Former TAG was EBA_`,
                 `#define ${definesTag}_FONTZSIZE(SIZE) #(((SIZE * 0.00222222) * (getResolution select 1)) / 1080)`,
                 ''
@@ -381,7 +397,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         `${Align(1)}};`,
         `};`
     ]
-    Render.push(Dialog.join('\n'))  
+    Render.push(Dialog.join('\n'))
 
     return [Render.join('\n'), IDXsList, time, ConversionErrors]
 }
@@ -394,7 +410,9 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
  * 
  */
 const fs = require('fs');
-const {parseSync} = require('svgson')
+const {
+    parseSync
+} = require('svgson')
 
 
 const express = require('express')
@@ -410,7 +428,7 @@ server.listen(port)
 
 console.log(`Server Started on ${ip.address()}:${port}`)
 io.on('connection', function (socket) {
-    socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportImages, exportText, addFontSizeMacro) => {
+    socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro) => {
         //ParseGUI(data)[4]
         let time = new Date().getTime()
         try {
@@ -418,7 +436,7 @@ io.on('connection', function (socket) {
             if (parsedGUI[0] === false) {
                 socket.emit('GenerationError', ['ERR', parsedGUI[1]])
             } else {
-                let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
+                let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro)
                 if (result[0] === false) {
                     socket.emit('GenerationError', ['ERR', result[1]])
                     socket.emit('ConversionErrors', result[2])
@@ -457,9 +475,9 @@ app.get('*', (req, res) => {
             if (err) {
                 res.sendFile(`${__dirname}/public/error.html`)
             }
-        })       
+        })
     } else if (url === '/error') {
-            res.sendFile(`${__dirname}/public/error.html`)
+        res.sendFile(`${__dirname}/public/error.html`)
     } else {
         const file = `${__dirname}${req.originalUrl}`;
         res.sendFile(file, (err) => {
