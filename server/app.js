@@ -1,3 +1,5 @@
+const ColorUtil = new(require('./util/Colors.js'))()
+
 function Align(tabs) {
     let result = new Array()
     for (let i = 0; i < tabs; i++) {
@@ -17,6 +19,7 @@ function ExtractSVGData(svgraw) {
     let Id = SVG.children[1].attributes.id
     let Name = Id.split(':')[0]
     let Forms = SVG.children[1].children
+
     return [Dimensions, Id, Name, Forms]
 }
 
@@ -65,6 +68,7 @@ function RelativePosition(controlPos, groupPos) {
 
 //Generates Controls from elements
 function ParseControls(forms) {
+
     let result = new Array()
     forms.forEach(item => {
         if (hasBorders(item)) {
@@ -122,11 +126,14 @@ function ParseControls(forms) {
             let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
+            let ControlColor = ColorUtil.parseColors(item.attributes)
+
             result.push([
                 'RECT',
                 ControlClass,
                 ControlPosition,
-                ControlName
+                ControlName,
+                ControlColor
             ])
         } else if (isImage(item)) {
             let ControlClass = TransformClass(item.attributes.id)
@@ -175,7 +182,7 @@ function ParseControls(forms) {
 }
 
 //Build main dialog control class
-function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportImages, exportText, ConversionErrors) {
+function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, groupName, tag, idxsList, exportColors, exportImages, exportText, ConversionErrors) {
     let result = new Array()
     let IDXList = new Array()
     IDXList = IDXList.concat(idxsList)
@@ -192,6 +199,9 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
                 }
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
+            if (exportColors && element[4].length > 0) {
+                Control.push(`${Align(tabs + 1)}colorBackground[] = {${element[4][0]},${element[4][1]},${element[4][2]},${element[4][3]}};`)
+            }
             Control.push(`${Align(tabs)}};`)
             result.push(Control.join('\n'))
         } else if (element[0] === 'GROUP') {
@@ -204,7 +214,7 @@ function BuildControls(data, addIDXs, rootIDX, useIDXsMacros, tabs, inGroup, gro
             }
             Control.push(`${Align(tabs + 1)}${tag}_POSITION${(inGroup) ? '_CT' : ''}(${element[2][0]},${element[2][1]},${element[2][2]},${element[2][3]})`)
             Control.push(`${Align(tabs + 1)}class Controls {`)
-            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[4], tag, [], exportImages, exportText, ConversionErrors)
+            Controls = BuildControls(element[3], addIDXs, rootIDX, useIDXsMacros, tabs + 2, true, element[4], tag, [], exportColors, exportImages, exportText, ConversionErrors)
             rootIDX = Controls[1]
             ConversionErrors = Controls[3]
             IDXList = IDXList.concat(Controls[2])
@@ -314,7 +324,7 @@ function getMinMaxOf2DIndex(arr, idx) {
 }
 
 //Build the final GUI
-function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro) {
+function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro) {
     let time = new Date().getTime()
     let timeReadable = new Date(time).toUTCString()
     let Render = new Array()
@@ -330,7 +340,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         Render.push(Credits)
     }
 
-    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportImages, exportText, [])
+    let Controls = BuildControls(data[4], addIDXs, rootIDX - 1, useIDXsMacros, 2, false, '', definesTag, [], exportColors, exportImages, exportText, [])
     ConversionErrors = Controls[3]
     if (Controls[0].length === 0) {
         return [false, 'ERR_NO_VALID_CONTROL_FOUND', ConversionErrors]
@@ -417,7 +427,7 @@ server.listen(port)
 
 console.log(`Server Started on ${ip.address()}:${port}`)
 io.on('connection', function (socket) {
-    socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportImages, exportText, addFontSizeMacro) => {
+    socket.on('svg', (data, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro) => {
         //ParseGUI(data)[4]
         let time = new Date().getTime()
         try {
@@ -425,7 +435,7 @@ io.on('connection', function (socket) {
             if (parsedGUI[0] === false) {
                 socket.emit('GenerationError', ['ERR', parsedGUI[1]])
             } else {
-                let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
+                let result = BuildGUI(parsedGUI, addCredits, addDefines, definesTag, addIDXs, rootIDX, useIDXsMacros, separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro)
                 if (result[0] === false) {
                     socket.emit('GenerationError', ['ERR', result[1]])
                     socket.emit('ConversionErrors', result[2])
