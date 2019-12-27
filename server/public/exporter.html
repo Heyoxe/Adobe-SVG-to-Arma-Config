@@ -8,8 +8,8 @@
 
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 	<title>Adobe XD to Arma 3 - Exporter</title>
 </head>
@@ -28,7 +28,8 @@
 						<a class="nav-link" href="/">Home</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" target="_blank" href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config#how-to-use-it">How To Use</a>
+						<a class="nav-link" target="_blank"
+							href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config#how-to-use-it">How To Use</a>
 					</li>
 					<li class="nav-item active">
 						<a class="nav-link" href="/exporter">Exporter <span class="sr-only">(current)</span></a>
@@ -44,8 +45,8 @@
 				<h1 class="display-5 text-danger  "><strong> NON COMMERCIAL USE ONLY </strong> </h1>
 				<hr class="my-4">
 				<p class="lead">Attribution-NonCommercial-ShareAlike 4.0 International.</p>
-				<a class="btn btn-primary btn-lg" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
-					role="button">License</a>
+				<a class="btn btn-primary btn-lg" target="_blank"
+					href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode" role="button">License</a>
 			</div>
 		</div>
 
@@ -121,6 +122,17 @@
 				<div class="col-sm-2"></div>
 				<div class="col-sm-10">
 					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="exportColors">
+						<label class="form-check-label" for="gridCheck1">
+							Export Colors als Background Colors
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-10">
+					<div class="form-check">
 						<input class="form-check-input" type="checkbox" id="exportImages">
 						<label class="form-check-label" for="gridCheck1">
 							Export Images <strong>!EXPERIMENTAL!</strong>
@@ -187,10 +199,13 @@
         </div> -->
 
 		<nav class="nav flex-column flex-sm-row justify-content-center align-items-center">
-			<a class="nav-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode">License</a>
+			<a class="nav-link" target="_blank"
+				href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode">License</a>
 			<a class="nav-link" target="_blank" href="https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config">Github</a>
 			<a class="nav-link" target="_blank" href="https://discord.gg/QDGatN2">Discord</a>
-			<a class="nav-link" target="_blank" href="https://forums.bohemia.net/forums/topic/225459-adobe-xd-to-arma-3-convert-your-adobe-xd-guis-to-arma-3-sort-of/">BI Forum Thread</a>
+			<a class="nav-link" target="_blank"
+				href="https://forums.bohemia.net/forums/topic/225459-adobe-xd-to-arma-3-convert-your-adobe-xd-guis-to-arma-3-sort-of/">BI
+				Forum Thread</a>
 
 		</nav>
 		<!-- Optional JavaScript -->
@@ -205,158 +220,168 @@
 			integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
 		</script>
 
-	<!-- XD2A3 Scritps -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
-	<script src="http://code.jquery.com/jquery-2.0.3.min.js" ></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-	<script>
-		function sleep(ms) {
-			return new Promise(resolve => setTimeout(resolve, ms));
-		}
-
-		function ShowWarning(data) {
-			$(function() {
-				toastr["warning"](data[1], data[2], {
-					"closeButton": true,
-					"debug": false,
-					"newestOnTop": false,
-					"progressBar": true,
-					"positionClass": "toast-top-right",
-					"preventDuplicates": false,
-					"onclick": null,
-					"showDuration": "300",
-					"hideDuration": "1000",
-					"timeOut": "10000",
-					"extendedTimeOut": "1000",
-					"showEasing": "swing",
-					"hideEasing": "linear",
-					"showMethod": "fadeIn",
-					"hideMethod": "fadeOut"
-				})
-			})
-		}
-
-		function ShowError(data) {
-			$(function() {
-				toastr["error"](data[1], 'GUI Generation Failed', {
-					"closeButton": true,
-					"debug": false,
-					"newestOnTop": false,
-					"progressBar": true,
-					"positionClass": "toast-top-right",
-					"preventDuplicates": false,
-					"onclick": null,
-					"showDuration": "300",
-					"hideDuration": "1000",
-					"timeOut": "10000",
-					"extendedTimeOut": "1000",
-					"showEasing": "swing",
-					"hideEasing": "linear",
-					"showMethod": "fadeIn",
-					"hideMethod": "fadeOut"
-				})
-			})
-		}
-
-		function ShowSuccessPartial() {
-			$(function() {
-				toastr["success"]('Despite some errors, the GUI was successfully generated!', 'GUI Successfully Generated', {
-					"closeButton": true,
-					"debug": false,
-					"newestOnTop": false,
-					"progressBar": true,
-					"positionClass": "toast-top-right",
-					"preventDuplicates": false,
-					"onclick": null,
-					"showDuration": "300",
-					"hideDuration": "1000",
-					"timeOut": "10000",
-					"extendedTimeOut": "1000",
-					"showEasing": "swing",
-					"hideEasing": "linear",
-					"showMethod": "fadeIn",
-					"hideMethod": "fadeOut"
-				})
-			})
-		}
-
-		function ShowSuccess() {
-			$(function() {
-				toastr["success"]('The GUI was successfully generated without errors!', 'GUI Successfully Generated', {
-					"closeButton": true,
-					"debug": false,
-					"newestOnTop": false,
-					"progressBar": true,
-					"positionClass": "toast-top-right",
-					"preventDuplicates": false,
-					"onclick": null,
-					"showDuration": "300",
-					"hideDuration": "1000",
-					"timeOut": "10000",
-					"extendedTimeOut": "1000",
-					"showEasing": "swing",
-					"hideEasing": "linear",
-					"showMethod": "fadeIn",
-					"hideMethod": "fadeOut"
-				})
-			})
-		}
-
-		let socket = io()
-		let input = document.getElementById('file');
-		socket.on('converted', data => {
-			if (data[2].length === 0) {
-				ShowSuccess()
-			} else {
-				ShowSuccessPartial()
+		<!-- XD2A3 Scritps -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
+		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+		<script>
+			function sleep(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
 			}
-			download(new Blob([data[0]]), data[1])
-		})
-		socket.on('ConversionErrors', data => {
+
+			function ShowWarning(data) {
+				$(function () {
+					toastr["warning"](data[1], data[2], {
+						"closeButton": true,
+						"debug": false,
+						"newestOnTop": false,
+						"progressBar": true,
+						"positionClass": "toast-top-right",
+						"preventDuplicates": false,
+						"onclick": null,
+						"showDuration": "300",
+						"hideDuration": "1000",
+						"timeOut": "10000",
+						"extendedTimeOut": "1000",
+						"showEasing": "swing",
+						"hideEasing": "linear",
+						"showMethod": "fadeIn",
+						"hideMethod": "fadeOut"
+					})
+				})
+			}
+
+			function ShowError(data) {
+				$(function () {
+					toastr["error"](data[1], 'GUI Generation Failed', {
+						"closeButton": true,
+						"debug": false,
+						"newestOnTop": false,
+						"progressBar": true,
+						"positionClass": "toast-top-right",
+						"preventDuplicates": false,
+						"onclick": null,
+						"showDuration": "300",
+						"hideDuration": "1000",
+						"timeOut": "10000",
+						"extendedTimeOut": "1000",
+						"showEasing": "swing",
+						"hideEasing": "linear",
+						"showMethod": "fadeIn",
+						"hideMethod": "fadeOut"
+					})
+				})
+			}
+
+			function ShowSuccessPartial() {
+				$(function () {
+					toastr["success"]('Despite some errors, the GUI was successfully generated!',
+						'GUI Successfully Generated', {
+							"closeButton": true,
+							"debug": false,
+							"newestOnTop": false,
+							"progressBar": true,
+							"positionClass": "toast-top-right",
+							"preventDuplicates": false,
+							"onclick": null,
+							"showDuration": "300",
+							"hideDuration": "1000",
+							"timeOut": "10000",
+							"extendedTimeOut": "1000",
+							"showEasing": "swing",
+							"hideEasing": "linear",
+							"showMethod": "fadeIn",
+							"hideMethod": "fadeOut"
+						})
+				})
+			}
+
+			function ShowSuccess() {
+				$(function () {
+					toastr["success"]('The GUI was successfully generated without errors!',
+						'GUI Successfully Generated', {
+							"closeButton": true,
+							"debug": false,
+							"newestOnTop": false,
+							"progressBar": true,
+							"positionClass": "toast-top-right",
+							"preventDuplicates": false,
+							"onclick": null,
+							"showDuration": "300",
+							"hideDuration": "1000",
+							"timeOut": "10000",
+							"extendedTimeOut": "1000",
+							"showEasing": "swing",
+							"hideEasing": "linear",
+							"showMethod": "fadeIn",
+							"hideMethod": "fadeOut"
+						})
+				})
+			}
+
+			let socket = io()
+			let input = document.getElementById('file');
+			socket.on('converted', data => {
+				if (data[2].length === 0) {
+					ShowSuccess()
+				} else {
+					ShowSuccessPartial()
+				}
+				download(new Blob([data[0]]), data[1])
+			})
+			socket.on('ConversionErrors', data => {
 				data.forEach(element => {
 					ShowWarning(element)
 				})
-		})
-		socket.on('GenerationError', data => {
-			ShowError(data)
-		})
+			})
+			socket.on('GenerationError', data => {
+				ShowError(data)
+			})
 
-		rootidd = document.getElementById("rootIDX")
-		function getRandomInt(min, max) {
-			return Math.floor(Math.random() * (+max - +min) + +min);
-		}
+			rootidd = document.getElementById("rootIDX")
 
-		function RandomIDD() {
-			let randomNumber = getRandomInt(10000, 50000);
-			return randomNumber
-		}
-		let content = "";
-		rootidd.value = RandomIDD()
-		downloadBtn = document.getElementById('downloadBtn')
-		input.type = 'file';
-		input.onchange = e => {
-			let file = e.target.files[0];
-			let reader = new FileReader()
-			reader.readAsText(file, 'UTF-8')
-			reader.onload = readerEvent => {
-				content = readerEvent.target.result
+			function getRandomInt(min, max) {
+				return Math.floor(Math.random() * (+max - +min) + +min);
 			}
-		}
-		function convert() {
-			let addCredits = document.getElementById("addCredits").checked
-			let addDefines = document.getElementById("addDefines").checked
-			let definesTag = (document.getElementById("definesTag").value == "") ? "COOPR" : document.getElementById("definesTag").value
-			let addIDXs = document.getElementById("addIDXs").checked
-			let useIDXsMacros = document.getElementById("useIDXsMacros").checked
-			let rootIDX = (document.getElementById("rootIDX").value == "") ? Number("-1") : Number(document.getElementById("rootIDX").value)
-			let separateIDXsMacros = document.getElementById("separateIDXsMacros").checked
-			let exportImages = document.getElementById("exportImages").checked
-			let exportText = document.getElementById("exportText").checked
-			let addFontSizeMacro = document.getElementById("addFontSizeMacro").checked
-			socket.emit('svg', content, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX, separateIDXsMacros, exportImages, exportText, addFontSizeMacro)
-		}
-	</script>
+
+			function RandomIDD() {
+				let randomNumber = getRandomInt(10000, 50000);
+				return randomNumber
+			}
+			let content = "";
+			rootidd.value = RandomIDD()
+			downloadBtn = document.getElementById('downloadBtn')
+			input.type = 'file';
+			input.onchange = e => {
+				let file = e.target.files[0];
+				let reader = new FileReader()
+				reader.readAsText(file, 'UTF-8')
+				reader.onload = readerEvent => {
+					content = readerEvent.target.result
+				}
+			}
+
+			function convert() {
+				let addCredits = document.getElementById("addCredits").checked
+				let addDefines = document.getElementById("addDefines").checked
+				let definesTag = (document.getElementById("definesTag").value == "") ? "COOPR" : document.getElementById(
+					"definesTag").value
+				let addIDXs = document.getElementById("addIDXs").checked
+				let useIDXsMacros = document.getElementById("useIDXsMacros").checked
+				let rootIDX = (document.getElementById("rootIDX").value == "") ? Number("-1") : Number(document.getElementById(
+					"rootIDX").value)
+				let separateIDXsMacros = document.getElementById("separateIDXsMacros").checked
+				let exportColors = document.getElementById("exportColors").checked
+				let exportImages = document.getElementById("exportImages").checked
+				let exportText = document.getElementById("exportText").checked
+				let addFontSizeMacro = document.getElementById("addFontSizeMacro").checked
+				console.log(exportColors)
+				socket.emit('svg', content, addCredits, addDefines, definesTag, addIDXs, useIDXsMacros, rootIDX,
+					separateIDXsMacros, exportColors, exportImages, exportText, addFontSizeMacro)
+			}
+		</script>
 	</div>
 </body>
+
 </html>
