@@ -1,7 +1,7 @@
 function Align(tabs) {
     let result = new Array()
     for (let i = 0; i < tabs; i++) {
-        result.push("\t")  
+        result.push("\t")
     }
     return result.join('')
 }
@@ -11,7 +11,7 @@ function ExtractSVGData(svgraw) {
     let SVG = parseSync(svgraw)
     let ViewBox = SVG.attributes.viewBox.split(' ')
     let Dimensions = [
-        ViewBox[2], 
+        ViewBox[2],
         ViewBox[3]
     ]
     let Id = SVG.children[1].attributes.id
@@ -74,8 +74,8 @@ function ParseControls(forms) {
         } else if (!hasPosition(item) && !isGroup(item)) {
             result.push(['ERR', 'WRN_CANNOT_FIND_POSITION', item.attributes.id])
         } else if (isGroup(item)) {
-            let GroupOffset = (ParsePositions(item.attributes)).slice(0,2)
-            let ControlClass = TransformClass(item.attributes.id)   
+            let GroupOffset = (ParsePositions(item.attributes)).slice(0, 2)
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = new Array()
             let ControlChildrens = ParseControls(item.children)
             let ControlName = ControlClass.split(': ')[0]
@@ -83,10 +83,10 @@ function ParseControls(forms) {
                 ControlPosition.push(element[2])
             })
             ControlPosition = ([
-                Math.round(getMinMaxOf2DIndex(ControlPosition, 0).min), 
+                Math.round(getMinMaxOf2DIndex(ControlPosition, 0).min),
                 Math.round(getMinMaxOf2DIndex(ControlPosition, 1).min)
             ])
-            
+
             let w = 0
             let h = 0
             ControlChildrens.forEach(element => {
@@ -102,11 +102,11 @@ function ParseControls(forms) {
                 })
             })
             ControlPosition.push(Math.round(w), Math.round(h))
-            
+
             result.push([
                 'GROUP',
-                ControlClass, 
-                ControlPosition, 
+                ControlClass,
+                ControlPosition,
                 ControlChildrens,
                 ControlName
             ])
@@ -119,29 +119,29 @@ function ParseControls(forms) {
             ControlPosition[0] += GroupOffset[0]
             ControlPosition[1] += GroupOffset[1]
         } else if (isRectangle(item)) {
-            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
             result.push([
                 'RECT',
-                ControlClass, 
+                ControlClass,
                 ControlPosition,
                 ControlName
             ])
         } else if (isImage(item)) {
-            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
-            let ImagePath = item.attributes["xlink:href"].replace(/[\/]/g,'\\')
+            let ImagePath = item.attributes["xlink:href"].replace(/[\/]/g, '\\')
             result.push([
                 'IMAGE',
-                ControlClass, 
+                ControlClass,
                 ControlPosition,
                 ControlName,
                 ImagePath
-            ])           
+            ])
         } else if (isText(item)) {
-            let ControlClass = TransformClass(item.attributes.id)   
+            let ControlClass = TransformClass(item.attributes.id)
             let ControlPosition = ParsePositions(item.attributes)
             let ControlName = ControlClass.split(': ')[0]
             let FontSize = Number(item.attributes["font-size"])
@@ -161,7 +161,7 @@ function ParseControls(forms) {
             Text = Text.join('\n')
             result.push([
                 'TEXT',
-                ControlClass, 
+                ControlClass,
                 ControlPosition,
                 ControlName,
                 FontSize,
@@ -273,11 +273,11 @@ function ParseGUI(svgraw, time) {
             `${Align(1)}x = #((((X * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\`,
             `${Align(1)}y = #((((Y * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1)); \\`,
             `${Align(1)}w = #((((W * (getResolution select 0)) / 1920) * safeZoneW) / (getResolution select 0)); \\`,
-            `${Align(1)}h = #((((H * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1));`,          
+            `${Align(1)}h = #((((H * (getResolution select 1)) / 1080) * safeZoneH) / (getResolution select 1));`,
         ]
         let DialogClass = TransformClass(SVGData[1])
         let DialogName = TransformClass(SVGData[1]).split(' ')[0]
-        let Controls = ParseControls(SVGData[3])  
+        let Controls = ParseControls(SVGData[3])
         return [DialogName, Credits, Header, DialogClass, Controls]
     }
 }
@@ -295,6 +295,7 @@ function TransformClass(data) {
 function ParsePositions(data) {
     let x = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[0]) : 0
     let y = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[1]) : 0
+    y = isNaN(y) ? 0 : y
     let w = (data.width) ? Number(data.width) : 0
     let h = (data.height) ? Number(data.height) : 0
     return [Math.round(x), Math.round(y), Math.round(w), Math.round(h)]
@@ -303,8 +304,12 @@ function ParsePositions(data) {
 //https://stackoverflow.com/a/23398499
 function getMinMaxOf2DIndex(arr, idx) {
     return {
-        min: Math.min.apply(null, arr.map(function (e) { return e[idx]})),
-        max: Math.max.apply(null, arr.map(function (e) { return e[idx]}))
+        min: Math.min.apply(null, arr.map(function (e) {
+            return e[idx]
+        })),
+        max: Math.max.apply(null, arr.map(function (e) {
+            return e[idx]
+        }))
     }
 }
 
@@ -319,7 +324,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         let Credits = new Array('/*')
         data[1].forEach(element => {
             Credits.push(` * ${element}`)
-        }) 
+        })
         Credits.push(` */`, '')
         Credits = Credits.join('\n').replace('%NOW%', timeReadable)
         Render.push(Credits)
@@ -355,16 +360,16 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         let Defines = new Array()
         data[2].forEach(element => {
             Defines.push(element)
-        }) 
+        })
         Defines.push('')
         Defines = Defines.join('\n').replace(/%TAG%(?=_POSITION)/g, definesTag)
-        Render.push(Defines)        
+        Render.push(Defines)
     }
 
     if (exportText) {
         if (addFontSizeMacro) {
             Render.push(
-                `/* FontSize Macro */`, 
+                `/* FontSize Macro */`,
                 `//Macro by Heyoxe (https://steamcommunity.com/id/Heyoxe/). Former TAG was EBA_`,
                 `#define ${definesTag}_FONTZSIZE(SIZE) #(((SIZE * 0.00222222) * (getResolution select 1)) / 1080)`,
                 ''
@@ -381,7 +386,7 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
         `${Align(1)}};`,
         `};`
     ]
-    Render.push(Dialog.join('\n'))  
+    Render.push(Dialog.join('\n'))
 
     return [Render.join('\n'), IDXsList, time, ConversionErrors]
 }
@@ -394,7 +399,9 @@ function BuildGUI(data, addCredits, addDefines, definesTag, addIDXs, rootIDX, us
  * 
  */
 const fs = require('fs');
-const {parseSync} = require('svgson')
+const {
+    parseSync
+} = require('svgson')
 
 
 const express = require('express')
@@ -457,9 +464,9 @@ app.get('*', (req, res) => {
             if (err) {
                 res.sendFile(`${__dirname}/public/error.html`)
             }
-        })       
+        })
     } else if (url === '/error') {
-            res.sendFile(`${__dirname}/public/error.html`)
+        res.sendFile(`${__dirname}/public/error.html`)
     } else {
         const file = `${__dirname}${req.originalUrl}`;
         res.sendFile(file, (err) => {
