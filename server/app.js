@@ -287,7 +287,6 @@ function ParseGUI(svgraw, time) {
         ]
         let DialogClass = TransformClass(SVGData[1])
         let DialogName = TransformClass(SVGData[1]).split(' ')[0]
-
         let Controls = ParseControls(SVGData[3])
         return [DialogName, Credits, Header, DialogClass, Controls]
     }
@@ -306,6 +305,7 @@ function TransformClass(data) {
 function ParsePositions(data) {
     let x = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[0]) : 0
     let y = (data.transform) ? Number(data.transform.replace('translate(', '').replace(')', '').split(' ')[1]) : 0
+    y = isNaN(y) ? 0 : y
     let w = (data.width) ? Number(data.width) : 0
     let h = (data.height) ? Number(data.height) : 0
     return [Math.round(x), Math.round(y), Math.round(w), Math.round(h)]
