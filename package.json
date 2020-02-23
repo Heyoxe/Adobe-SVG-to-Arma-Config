@@ -4,14 +4,15 @@
   "description": "Converts simple Adobe XD SVG format into Arma3 UI configs",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd \"server\" && node app.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config.git"
   },
   "author": "Heyoxe",
-  "license": "ISC",
+  "license": "CC-BY-NC-SA-4.0",
   "bugs": {
     "url": "https://github.com/Heyoxe/Adobe-SVG-to-Arma-Config/issues"
   },
@@ -20,7 +21,6 @@
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "ip": "^1.1.5",
-    "node": "^12.9.1",
     "socket.io": "^2.2.0",
     "svgson": "^4.0.0"
   }
