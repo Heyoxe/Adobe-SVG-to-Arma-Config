@@ -40,11 +40,19 @@ For example:
 
 8.	Congratulation, you now have a Dialog that can be added to any mod/missions. Be sure to adjust path if you need to.
 ------------
-### Dependecies:
-- express
-- socket.io
-- svgson
-- ip
-- node
 
-### Default Port: 16224
+### Installation & Hosting
+1. Install [Node.js](https://nodejs.org/en/)
+2. Clone the repository
+3. run `npm install` to download the dependencies
+4. run `npm start` to start the application
+5. Enjoy your self-hosted version at `http://localhost:16224`
+
+------------
+
+### Dependecies:
+- [express](https://github.com/expressjs/express)
+- [socket.io](https://github.com/socketio/socket.io)
+- [svgson](https://github.com/elrumordelaluz/svgson)
+- [ip](https://github.com/indutny/node-ip)
+- [fs](https://nodejs.org/dist/latest-v12.x/docs/api/fs.html)
